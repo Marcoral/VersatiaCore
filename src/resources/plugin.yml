@@ -1,0 +1,7 @@
+name: VersatiaCore
+version: ${project.version}
+main: com.github.marcoral.versatia.core.Initializer
+
+author: Marcoral
+description: "Versatia makes development and management of your plugins easier than ever before!"
+website: www.github.com/Marcoral

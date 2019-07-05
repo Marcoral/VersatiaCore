@@ -1,0 +1,20 @@
+GenericErrorNoPermission: "^cse.You don't have permission to use this command."
+GenericErrorNoArguments:
+  Value: "^cse.You haven't specified command arguments. Valid ones are:"
+  PrintCommands: true
+  PrintForbiddenCommands: false
+GenericErrorNoCommand:
+  Value: "^cse.Unknown argument. Valid ones are:"
+  PrintCommands: true
+  PrintForbiddenCommands: false
+  
+#{0} stands for command name
+CommandsDescriptionFormat: "^csch.{0}"
+
+#{0} stands for command name, {1} stands for description
+CommandsRichDescriptionFormat: "^csch.{0} ^csc.- {1}"
+
+GenericErrorPlayersOnly: "^cse.You must be online to execute this command."
+GenericErrorIncorrectUse: "^cse.Incorrect usage of command."
+GenericErrorIncorrectUseInfo: "$GenericErrorIncorrectUse$ Correct usage:"
+GenericErrorIncorrectUseAvailableFlags: "^csch.Available flags:"
