@@ -19,6 +19,12 @@ import com.github.marcoral.versatia.core.impl.coreimpl.commands.CoreConfiguratio
 import com.github.marcoral.versatia.core.impl.coreimpl.commands.CoreSubmodulesReloadCommand;
 import com.github.marcoral.versatia.core.impl.coreimpl.commands.SubmodulesReloadCommand;
 
+//Uwaga: Niniejszy kod został napisany przez Polskiego pojeba, informatyka czyt. Marcin Polak
+//Z zainteresowania pasjonat informatyki, ale w rzeczywistości to po prostu jebany ochlapus, kroczek nie ma nawet podskoku do tego Pana
+//Bardzo często coś klepie, ale zazwyczaj to po prostu nie wychodzi, MaRPG - spalone swoja droga... dygu dyg! - strzeżcie się olbrzymy nadchodzę!
+//Jeśli ma zamiar przeczytać to ktoś oprócz Marcina z historii commitów - to tylko żarty spokojnie, mogę tego pana polecić
+//~Paweł Dębiński (pseudonim luxdevpl)
+
 public class Initializer extends JavaPlugin {
     @Override
     public void onEnable() {
