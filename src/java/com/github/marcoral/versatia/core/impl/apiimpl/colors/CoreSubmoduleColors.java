@@ -5,7 +5,6 @@ import java.util.Map;
 
 import com.github.marcoral.versatia.core.api.colors.ColorConverter;
 import com.github.marcoral.versatia.core.api.colors.VersatiaColor;
-import com.github.marcoral.versatia.core.api.configuration.VersatiaConfigurationFile;
 import com.github.marcoral.versatia.core.api.configuration.VersatiaConfigurationProcessor;
 import com.github.marcoral.versatia.core.api.modules.UnloadedModuleAccessSave;
 import com.github.marcoral.versatia.core.api.modules.submodules.VersatiaSubmodule;
@@ -33,12 +32,11 @@ public class CoreSubmoduleColors implements VersatiaSubmodule, ColorConverter {
 
     @Override
     public void load() {
-        VersatiaConfigurationFile config = module.getConfig(VersatiaCoreConstants.Paths.COLORCODDES);
-        VersatiaConfigurationProcessor processor = config.getProcessor();
+        VersatiaConfigurationProcessor config = module.getConfigProcessor(VersatiaCoreConstants.Paths.COLORCODDES);
         TextualNodeDependencyResolver<VersatiaColor> resolver = new TextualNodeDependencyResolver<>();
         for (VersatiaColor color : VersatiaColor.values()) {
             String keyString = color.name();
-            String value = processor.getStringOrThrow(keyString, String.format("No keycode found for node %s!", keyString));
+            String value = config.getStringOrThrow(keyString, String.format("No keycode found for node %s!", keyString));
             resolver.newEntry(color, value, color.getReferenceKey());
         }
         resolver.resolve((color, string) -> colorTranslations.put(color, VersatiaTools.getColoredString(string)));

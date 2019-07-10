@@ -2,7 +2,7 @@ package com.github.marcoral.versatia.core.impl.apiimpl.modules;
 
 import java.util.function.BiConsumer;
 
-import com.github.marcoral.versatia.core.api.configuration.VersatiaConfigurationFile;
+import com.github.marcoral.versatia.core.api.configuration.VersatiaConfigurationProcessor;
 import com.github.marcoral.versatia.core.api.modules.VersatiaModule;
 import com.github.marcoral.versatia.core.api.modules.VersatiaModuleInitializer;
 import com.github.marcoral.versatia.core.api.modules.commands.CommandPriority;
@@ -75,15 +75,15 @@ public class VersatiaModuleInitializerImpl implements VersatiaModuleInitializer 
 	public void overwriteConfiguration() {
 		underlyingModule.overwriteConfiguration();
 	}
-
-	@Override
-	public VersatiaConfigurationFile getConfig(String path) {
-		return underlyingModule.getConfig(path);
-	}
 	
 	@Override
 	public VersatiaLogger getLogger(String loggerKey) {
 		return underlyingModule.getLogger(loggerKey);
+	}
+	
+	@Override
+	public VersatiaConfigurationProcessor getConfigProcessor(String path) {
+		return underlyingModule.getConfigProcessor(path);
 	}
 
 	@Override

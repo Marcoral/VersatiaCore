@@ -8,6 +8,7 @@ import org.bukkit.plugin.Plugin;
 
 import com.github.marcoral.versatia.core.api.VersatiaConstants;
 import com.github.marcoral.versatia.core.api.configuration.VersatiaConfigurationFile;
+import com.github.marcoral.versatia.core.api.configuration.VersatiaConfigurationProcessor;
 import com.github.marcoral.versatia.core.api.events.VersatiaModuleReloadedEvent;
 import com.github.marcoral.versatia.core.api.modules.VersatiaModule;
 import com.github.marcoral.versatia.core.api.modules.commands.CommandPriority;
@@ -125,6 +126,14 @@ public class VersatiaModuleImpl implements VersatiaModule {
         path = asPlugin().getDataFolder() + "/" + path;
         return VersatiaTools.searchForConfigurationFile(path);
     }
+    
+	@Override
+	public VersatiaConfigurationProcessor getConfigProcessor(String path) {
+		VersatiaConfigurationFile configFile = getConfig(path);
+		if(configFile.exists())
+			throw new NullPointerException("Requested processor of non-existing config!");
+		return configFile.getProcessor();
+	}
     
 	@Override
 	public VersatiaLogger getLogger(String loggerName) {
