@@ -3,6 +3,7 @@ package com.github.marcoral.versatia.core.impl.apiimpl.configuration;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
 
 import org.bukkit.Color;
 import org.bukkit.OfflinePlayer;
@@ -13,7 +14,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
 import com.github.marcoral.versatia.core.api.configuration.VersatiaConfigurationProcessor;
+import com.github.marcoral.versatia.core.api.modules.VersatiaModule;
+import com.github.marcoral.versatia.core.api.modules.messages.VersatiaMessageDescriptor;
+import com.github.marcoral.versatia.core.api.modules.messages.VersatiaMessages;
 import com.github.marcoral.versatia.core.api.tools.VersatiaTools;
+import com.github.marcoral.versatia.core.impl.VersatiaCoreConstants;
 
 public class VersatiaConfigurationProcessorImpl implements VersatiaConfigurationProcessor {
     private ConfigurationSection data;
@@ -113,13 +118,11 @@ public class VersatiaConfigurationProcessorImpl implements VersatiaConfiguration
     }
 
     @Override
-    public VersatiaConfigurationProcessor moveToSectionOrThrow(String key, String exceptionMessage) {
-        if(!contains(key))
+    public void moveToSectionOrThrow(String key, String exceptionMessage) {
+        if(!isConfigurationSection(key))
             throw new NullPointerException(exceptionMessage);
         ConfigurationSection section = getConfigurationSection(key);
-        if(section == null)
-            throw new NullPointerException(exceptionMessage);
-        return new VersatiaConfigurationProcessorImpl(section);
+        data = section;
     }
 
     @Override
@@ -433,8 +436,8 @@ public class VersatiaConfigurationProcessorImpl implements VersatiaConfiguration
     }
 
     @Override
-    public ConfigurationSection getConfigurationSection(String path) {
-        return data.getConfigurationSection(path);
+    public VersatiaConfigurationProcessor getConfigurationSection(String path) {
+        return new VersatiaConfigurationProcessorImpl(data.getConfigurationSection(path));
     }
 
     @Override
@@ -451,4 +454,44 @@ public class VersatiaConfigurationProcessorImpl implements VersatiaConfiguration
     public void addDefault(String path, Object value) {
         data.addDefault(path, value);
     }
+
+	@Override
+	public VersatiaConfigurationProcessor getConfigurationSectionOrThrow(String key, String exceptionMessage) {
+		if(!isConfigurationSection(key))
+            throw new NullPointerException(exceptionMessage);
+        ConfigurationSection section = getConfigurationSection(key);
+        return new VersatiaConfigurationProcessorImpl(section);
+	}
+
+	@Override
+	public boolean moveToSectionIfPossible(String key) {
+		if(!isConfigurationSection(key))
+			return false;
+		data = getConfigurationSection(key);
+		return true;
+	}
+
+	@Override
+	public VersatiaMessageDescriptor getMessageDescriptor(String key, VersatiaModule defaultModule) {
+		String message = getString(key);
+        Matcher matcher = VersatiaCoreConstants.Patterns.MESSAGES_REFERENCE_PATTERN.matcher(message);
+        if(!matcher.find())
+        	return null;
+        String referencedModuleName = matcher.group(1);
+        String referencedNode = matcher.group(3);
+        
+        //That means that in fact no referenced module name was found
+        if(referencedNode == null)
+        	//In that case referencedModuleName is in fact referenced node key
+            return VersatiaMessages.createTemplateDescriptor(defaultModule, referencedModuleName);
+        else
+        	return VersatiaMessages.createTemplateDescriptor(referencedModuleName, referencedNode);
+	}
+
+	@Override
+	public VersatiaMessageDescriptor getMessageDescriptorOrThrow(String key, VersatiaModule defaultModule, String exceptionMessage) {
+        if(!isString(key))
+            throw new NullPointerException(exceptionMessage);
+		return getMessageDescriptor(key, defaultModule);
+	}
 }

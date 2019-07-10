@@ -1,0 +1,10 @@
+VersatiaLoggerPrefixBase: "&6[Versatia]"
+VersatiaLoggerPrefixBaseHighlighed: "&6[Versatia]"
+
+VersatiaLoggerPrefixFinest: "$VersatiaLoggerPrefixBase$$LoggersPrefixFinest$"
+VersatiaLoggerPrefixFiner: "$VersatiaLoggerPrefixBase$$LoggersPrefixFiner$"
+VersatiaLoggerPrefixFine: "$VersatiaLoggerPrefixBase$$LoggersPrefixFine$"
+VersatiaLoggerPrefixInfo: "$VersatiaLoggerPrefixBaseHighlighed$$LoggersPrefixInfo$"
+VersatiaLoggerPrefixWarning: "$VersatiaLoggerPrefixBaseHighlighed$$LoggersPrefixWarning$"
+VersatiaLoggerPrefixError: "$VersatiaLoggerPrefixBaseHighlighed$$LoggersPrefixError$"
+VersatiaLoggerPrefixSevere: "$VersatiaLoggerPrefixBaseHighlighed$$LoggersPrefixSevere$"

@@ -11,6 +11,7 @@ import org.bukkit.command.SimpleCommandMap;
 import com.github.marcoral.versatia.core.api.events.VersatiaCommandHandlerChangedEvent;
 import com.github.marcoral.versatia.core.api.modules.commands.CommandPriority;
 import com.github.marcoral.versatia.core.impl.apiimpl.Hacky;
+import com.github.marcoral.versatia.core.impl.apiimpl.modules.commands.CommandRoot;
 import com.github.marcoral.versatia.core.impl.tools.DummyReflections;
 import com.github.marcoral.versatia.core.impl.tools.NMSAvoider;
 
@@ -30,11 +31,11 @@ public class CommandsManager {
     @SuppressWarnings("unchecked")
 	@Hacky private static final Map<String, Command> NMSknownCommands = (Map<String, Command>) DummyReflections.getFieldValue(commandMap, "knownCommands");
 
-    private static final Map<String, PriorityQueue<CommandRoot<?>>> commandsQueue = new HashMap<>();
-    private static final Map<String, CommandRoot<?>> activeCommands = new HashMap<>();
+    private static final Map<String, PriorityQueue<CommandRoot>> commandsQueue = new HashMap<>();
+    private static final Map<String, CommandRoot> activeCommands = new HashMap<>();
 
-    public static RegisteringResult registerCommand(CommandRoot<?> command) {
-        CommandRoot<?> existingCommand = activeCommands.get(command.getName());
+    public static RegisteringResult registerCommand(CommandRoot command) {
+        CommandRoot existingCommand = activeCommands.get(command.getName());
         RegisteringResult result;
         if(existingCommand == null)
             result = RegisteringResult.SUCCESS;
@@ -61,36 +62,36 @@ public class CommandsManager {
         }
     }
 
-    private static void addCommandToQueue(CommandRoot<?> command) {
-        PriorityQueue<CommandRoot<?>> queue = commandsQueue.computeIfAbsent(command.getName(), accessorC -> new PriorityQueue<>());
+    private static void addCommandToQueue(CommandRoot command) {
+        PriorityQueue<CommandRoot> queue = commandsQueue.computeIfAbsent(command.getName(), accessorC -> new PriorityQueue<>());
         queue.add(command);
     }
 
-    private static void checkedCommandRegister(CommandRoot<?> command) {
+    private static void checkedCommandRegister(CommandRoot command) {
         checkedMarkCommandAsActive(command);
     }
 
-    private static void checkedCommandOverride(CommandRoot<?> existingCommand, CommandRoot<?> command) {
+    private static void checkedCommandOverride(CommandRoot existingCommand, CommandRoot command) {
         addCommandToQueue(existingCommand);
         checkedMarkCommandAsActive(command);
         Bukkit.getServer().getPluginManager().callEvent(new VersatiaCommandHandlerChangedEvent(command.getName(), existingCommand.getRegisterer(), existingCommand.getPriority(), command.getRegisterer(), command.getPriority()));
     }
 
-    private static void checkedMarkCommandAsActive(CommandRoot<?> command) {
+    private static void checkedMarkCommandAsActive(CommandRoot command) {
         String accessor = command.getName();
         NMSknownCommands.remove(accessor);
         activeCommands.put(accessor, command);
         commandMap.register(accessor, command);
     }
 
-    public static UnregisteringResult unregisterCommand(CommandRoot<?> command) {
+    public static UnregisteringResult unregisterCommand(CommandRoot command) {
         String accessor = command.getName();
-        CommandRoot<?> activeCommand = activeCommands.get(accessor);
+        CommandRoot activeCommand = activeCommands.get(accessor);
         if(activeCommand.equals(command)) {
             checkedCommandUnregister(accessor);
             return UnregisteringResult.REMOVED_ACTIVE;
         } else {
-            PriorityQueue<CommandRoot<?>> queue = commandsQueue.get(accessor);
+            PriorityQueue<CommandRoot> queue = commandsQueue.get(accessor);
             queue.remove(command);
             if(queue.size() == 0)
                 commandsQueue.remove(accessor);
@@ -105,9 +106,9 @@ public class CommandsManager {
     }
 
     private static void registerNextCommandFromQueue(String accessor) {
-        PriorityQueue<CommandRoot<?>> queue = commandsQueue.get(accessor);
+        PriorityQueue<CommandRoot> queue = commandsQueue.get(accessor);
         if(queue != null) {
-            CommandRoot<?> command = queue.poll();
+            CommandRoot command = queue.poll();
             if(queue.size() == 0)
                 commandsQueue.remove(accessor);
             checkedCommandRegister(command);

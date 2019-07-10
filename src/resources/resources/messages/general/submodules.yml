@@ -1,0 +1,43 @@
+# {0} - module name
+SubmoduleReloadEveryRequest: "&&cc.Requested to reload every submodule from module &&cch.{0}"
+
+# {0} - module name
+# {1} - submodule name
+SubmoduleReloaded: "&&cs.Reloaded submodule &&csh.{1}&&cs. from &&csh.{0}"
+
+# {0} - module name
+# {1} - submodule name
+SubmoduleReloadingError: "&&ce.An exception was caught when module &&ceh.{0}&&ce. tried to reload submodule &&ceh.{1}"
+
+# {0} - module name
+# {1} - submodule name
+SubmoduleShuttingDownError: "&&ce.An exception was caught when module &&ceh.{0}&&ce. tried to shut down submodule &&ceh.{1}"
+
+# {0} - module name
+# {1} - submodule name
+SubmoduleUnknown: "&&ce.Requested reload of unknown submodule: ''&&ceh.{1}&&ce.'' from module &&ceh.{0}"
+
+# {0} - module name
+# {1} - submodule name
+RequestedSubmoduleAdd: "&&cc.Module &&cch.{0}&&cc. tries to register submodule: &cch.{1}"
+
+# {0} - module name
+# {1} - group name
+RequestedSubmodulesGroupAdd: "&&cc.Module &&cch.{0}&&cc. tries to register submodules group: &cch.{1}"
+
+# {0} - module name
+# {1} - submodule name
+SubmoduleAddingError: "&&ce.An exception was caught when module &&ceh.{0}&&ce. tried to register submodule &&ceh.{1}"
+
+# {0} - module name
+# {1} - submodule name
+SubmoduleAddedSuccessfully: "&&cs.Module &&csh.{0}&&cs. registered submodule: &&csh.{1}&&cs. successfully."
+
+# {0} - module name
+# {1} - submodule name
+SubmodulesGroupFormed: "&&cc.Module &&cch.{0}&&cc. formed submodules group: &cch.{1}"
+
+# {0} - module name
+# {1} - group name
+# {2} - unknown submodule name
+UnknownSubmoduleInGroup: "&&ce.Group &&ceh.{1}&&ce from module &&ceh.{0}&&ce. contains unknown submodule reference: &&ceh.{2}"

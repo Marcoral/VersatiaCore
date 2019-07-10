@@ -1,0 +1,11 @@
+# {0} - module name
+# {1} - submodule name
+LoggerRegistered: "&&cc.Module &&cch.{0}&&cc. registered logger: &&cch.{1}"
+
+LoggersPrefixFinest: "&&cc."
+LoggersPrefixFiner: "&&cc."
+LoggersPrefixFine: "&&cc."
+LoggersPrefixInfo: "&&cch."
+LoggersPrefixWarning: "&&ce.&l[WARNING] &&ce."
+LoggersPrefixError: "&&ceh.&l[ERROR] &&ceh."
+LoggersPrefixSevere: "&&ceh.&l[SEVERE] &&ceh.&l"

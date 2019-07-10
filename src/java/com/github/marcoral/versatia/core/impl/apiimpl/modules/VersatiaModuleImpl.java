@@ -1,45 +1,76 @@
 package com.github.marcoral.versatia.core.impl.apiimpl.modules;
 
 import java.io.File;
+import java.util.function.BiConsumer;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 
+import com.github.marcoral.versatia.core.api.VersatiaConstants;
 import com.github.marcoral.versatia.core.api.configuration.VersatiaConfigurationFile;
 import com.github.marcoral.versatia.core.api.events.VersatiaModuleReloadedEvent;
 import com.github.marcoral.versatia.core.api.modules.VersatiaModule;
 import com.github.marcoral.versatia.core.api.modules.commands.CommandPriority;
-import com.github.marcoral.versatia.core.api.modules.commands.VersatiaCommandBuilder;
+import com.github.marcoral.versatia.core.api.modules.commands.VersatiaCommand;
 import com.github.marcoral.versatia.core.api.modules.commands.VersatiaCommandFamilyBuilder;
-import com.github.marcoral.versatia.core.api.modules.commands.VersatiaCommandHandler;
+import com.github.marcoral.versatia.core.api.modules.commands.VersatiaGenericCommand;
+import com.github.marcoral.versatia.core.api.modules.commands.VersatiaPlayerCommand;
 import com.github.marcoral.versatia.core.api.modules.commands.VersatiaPlayerCommandFamilyBuilder;
-import com.github.marcoral.versatia.core.api.modules.commands.VersatiaPlayerCommandHandler;
+import com.github.marcoral.versatia.core.api.modules.loggers.VersatiaLogger;
+import com.github.marcoral.versatia.core.api.modules.loggers.VersatiaLoggers;
 import com.github.marcoral.versatia.core.api.modules.messages.VersatiaMessageEntry;
 import com.github.marcoral.versatia.core.api.modules.submodules.VersatiaModuleReloadResult;
+import com.github.marcoral.versatia.core.api.modules.submodules.VersatiaSubmodule;
 import com.github.marcoral.versatia.core.api.tools.VersatiaTools;
 import com.github.marcoral.versatia.core.impl.apiimpl.modules.commands.ModuleCommandsManager;
+import com.github.marcoral.versatia.core.impl.apiimpl.modules.loggers.ModuleLoggersManager;
 import com.github.marcoral.versatia.core.impl.apiimpl.modules.messages.ModuleMessagesManager;
 import com.github.marcoral.versatia.core.impl.apiimpl.modules.submodules.ModuleSubmodulesManager;
 
 public class VersatiaModuleImpl implements VersatiaModule {
-    private final ModuleContext context;
+	protected final String moduleName;
+    protected final ModuleCommandsManager commandsManager;
+    protected final ModuleLoggersManager loggersManager;
+    protected final ModuleMessagesManager messagesManager;
+    protected final ModuleSubmodulesManager submodulesManager;
+    
     public VersatiaModuleImpl(Plugin plugin) {
-        this.context = new ModuleContext(plugin);
+        this.moduleName = plugin.getName();
+        this.commandsManager = new ModuleCommandsManager(this);
+        this.loggersManager = new ModuleLoggersManager(new File(plugin.getDataFolder(), VersatiaConstants.Path.LOGGERS_DIRECTORY), moduleName, this);
+        this.messagesManager = new ModuleMessagesManager(plugin);
+        this.submodulesManager = new ModuleSubmodulesManager(plugin.getName());
+    }
+
+    public void addDefaultSubmodules() {
+        submodulesManager.addSubmodule(messagesManager);
+        submodulesManager.addSubmodule(loggersManager);	//Must be added after messages submodule!
     }
 
     private void validateNotDisabled() {
-        if(!Bukkit.getPluginManager().getPlugin(context.getModuleName()).isEnabled())
+        if(!Bukkit.getPluginManager().getPlugin(moduleName).isEnabled())
             throw new IllegalStateException("Can not invoke on disabled module!");
     }
 
     private Plugin asPlugin() {
-        return Bukkit.getPluginManager().getPlugin(context.getModuleName());
+        return Bukkit.getPluginManager().getPlugin(moduleName);
     }
+    
+	@Override
+	public void addSubmodule(VersatiaSubmodule submodule) {
+		submodulesManager.addSubmodule(submodule);
+	}
+
+	@Override
+	public void groupSubmodules(String groupKey, String... submodulesNames) {
+		submodulesManager.groupSubmodules(groupKey, submodulesNames);
+	}
 
     @Override
     public VersatiaModuleReloadResult reloadEverySubmodule() {
         validateNotDisabled();
-        VersatiaModuleReloadResult result = context.getSubmodules().reloadEverySubmodule();
+        VersatiaLoggers.getDefaultLogger().finer("SubmoduleReloadEveryRequest", moduleName);
+        VersatiaModuleReloadResult result = submodulesManager.reloadEverySubmodule();
         Bukkit.getPluginManager().callEvent(new VersatiaModuleReloadedEvent(this, result));
         return result;
     }
@@ -47,36 +78,41 @@ public class VersatiaModuleImpl implements VersatiaModule {
     @Override
     public VersatiaModuleReloadResult reloadSubmodules(String... submodules) {
         validateNotDisabled();
-        VersatiaModuleReloadResult result = context.getSubmodules().reloadSubmodules(submodules);
+        VersatiaModuleReloadResult result = submodulesManager.reloadSubmodules(submodules);
         Bukkit.getPluginManager().callEvent(new VersatiaModuleReloadedEvent(this, result));
         return result;
     }
 
     @Override
-    public VersatiaCommandBuilder registerGenericCommand(String name, VersatiaCommandHandler handler, CommandPriority priority) {
-        return context.getCommands().registerGenericCommand(name, handler, priority, ctx -> {});
+    public void registerGenericCommand(VersatiaGenericCommand command, CommandPriority priority) {
+        commandsManager.registerGenericCommand(command, priority);
     }
 
 
     @Override
-    public VersatiaCommandBuilder registerPlayerOnlyCommand(String name, VersatiaPlayerCommandHandler handler, CommandPriority priority) {
-        return context.getCommands().registerPlayerOnlyCommand(name, handler, priority, ctx -> {});
+    public void registerPlayerOnlyCommand(VersatiaPlayerCommand handler, CommandPriority priority) {
+        commandsManager.registerPlayerOnlyCommand(handler, priority);
     }
 
 
     @Override
-    public VersatiaCommandFamilyBuilder registerGenericCommandsFamily(String commandFamilyLabel, CommandPriority priority) {
-        return context.getCommands().registerGenericCommandsFamily(commandFamilyLabel, priority, ctx -> {});
+    public VersatiaCommandFamilyBuilder registerGenericCommandsFamily(VersatiaCommand descriptor, CommandPriority priority) {
+        return commandsManager.registerGenericCommandsFamily(descriptor, priority);
     }
 
     @Override
-    public VersatiaPlayerCommandFamilyBuilder registerPlayerOnlyCommandsFamily(String commandFamilyLabel, CommandPriority priority) {
-        return context.getCommands().registerPlayerOnlyCommandsFamily(commandFamilyLabel, priority, ctx -> {});
+    public VersatiaPlayerCommandFamilyBuilder registerPlayerOnlyCommandsFamily(VersatiaCommand descriptor, CommandPriority priority) {
+        return commandsManager.registerPlayerOnlyCommandsFamily(descriptor, priority);
     }
+    
+	@Override
+	public void unregisterRootCommand(String name) {
+		commandsManager.unregisterRootCommand(name);	
+	}
 
     @Override
     public void regenerateConfiguration() {
-        VersatiaTools.unpackFiles(asPlugin(),false);
+        VersatiaTools.unpackFiles(asPlugin(), false);
     }
 
     @Override
@@ -91,53 +127,28 @@ public class VersatiaModuleImpl implements VersatiaModule {
     }
     
 	@Override
-		public VersatiaMessageEntry getMessageTemplateEntry(String key) {
-		return context.getMessages().getTemplate(key);
+	public VersatiaLogger getLogger(String loggerName) {
+		return loggersManager.getLogger(loggerName);
 	}
-
-	public ModuleContext getModuleContext() {
-		return context;
+    
+	@Override
+	public void setMessageTemplatesProcessor(BiConsumer<String, String> processor) {
+		messagesManager.setMessageTemplatesProcessor(processor);
+	}
+    
+	@Override
+	public VersatiaMessageEntry getMessageTemplateEntry(String key) {
+		return messagesManager.getTemplate(key);
 	}
 
     public void shutdown() {
-    	context.shutdown();
+    	//SubmodulesManager should always be shut down as first
+    	submodulesManager.shutdown();
+
+    	commandsManager.shutdown();
     }
-    
-    public class ModuleContext {
-        private final String moduleName;
-        private final ModuleMessagesManager messagesManager;
-        private final ModuleSubmodulesManager submodulesManager;
-        private final ModuleCommandsManager commandsManager;
 
-        public ModuleContext(Plugin plugin) {
-            this.moduleName = plugin.getName();
-            this.messagesManager = new ModuleMessagesManager(new File(plugin.getDataFolder(), "messages"));
-            this.submodulesManager = new ModuleSubmodulesManager();
-            this.commandsManager = new ModuleCommandsManager(VersatiaModuleImpl.this);
-        }
-
-        public String getModuleName() {
-            return moduleName;
-        }
-        
-        public ModuleMessagesManager getMessages() {
-        	return messagesManager;
-        }
-
-        public ModuleCommandsManager getCommands() {
-            return commandsManager;
-        }
-        
-        public ModuleSubmodulesManager getSubmodules() {
-            return submodulesManager;
-        }
-        
-        private void shutdown() {
-        	//SubmodulesManager should always be shut down as first
-        	submodulesManager.shutdown();
-        	
-        	messagesManager.shutdown();
-        	commandsManager.shutdown();
-        }
-    }
+	public void validate() {
+		submodulesManager.validate();
+	}
 }

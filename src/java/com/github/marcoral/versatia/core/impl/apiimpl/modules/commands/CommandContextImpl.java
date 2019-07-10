@@ -2,9 +2,9 @@ package com.github.marcoral.versatia.core.impl.apiimpl.modules.commands;
 
 import org.bukkit.command.CommandSender;
 
-import com.github.marcoral.versatia.core.api.colors.VersatiaChat;
 import com.github.marcoral.versatia.core.api.modules.VersatiaModule;
 import com.github.marcoral.versatia.core.api.modules.commands.VersatiaCommandContext;
+import com.github.marcoral.versatia.core.api.modules.messages.VersatiaMessages;
 
 public class CommandContextImpl implements VersatiaCommandContext {
 	private VersatiaModule module;
@@ -49,6 +49,6 @@ public class CommandContextImpl implements VersatiaCommandContext {
 
 	@Override
 	public void replyToExecutor(String messageTemplateKey, String... args) {
-		VersatiaChat.sendVersatiaMessageToCommandSender(executor, module.getMessageTemplate(messageTemplateKey), args);
+		VersatiaMessages.sendVersatiaMessageToCommandSender(executor, module.getMessageTemplate(messageTemplateKey), args);
 	}
 }

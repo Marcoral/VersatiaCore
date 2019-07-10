@@ -1,0 +1,8 @@
+#{0} - module name
+#{1} - amount of loaded message templates
+TotalLoadedMessageTemplates: "&&cc.Module &&cch.{0}&&cc. loaded &&cch.{1}&&cc. message templates"
+
+PrefixPlayer: "&&bch.&l[&&bc.Versatia&&bch.&l] "
+PrefixPlayerCommand: "&&pcch.&l[&&pcc.Versatia&&pcch.&l] "
+PrefixBroadcast: ""
+PrefixConsole: ""

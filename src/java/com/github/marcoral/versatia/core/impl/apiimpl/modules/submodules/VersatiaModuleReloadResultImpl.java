@@ -8,6 +8,7 @@ import com.github.marcoral.versatia.core.api.modules.submodules.VersatiaModuleRe
 
 public class VersatiaModuleReloadResultImpl implements VersatiaModuleReloadResult {
     private Set<String> reloadedSubmodulesNames = new HashSet<>();
+    private Set<String> errorSubmodulesNames = new HashSet<>();
     private Set<String> unknownSubmodulesNames = new HashSet<>();
     private Set<String> reloadedSubmodulesNamesUnmodifable = Collections.unmodifiableSet(reloadedSubmodulesNames);
     private Set<String> unknownSubmodulesNamesUnmodifable = Collections.unmodifiableSet(unknownSubmodulesNames);
@@ -15,6 +16,11 @@ public class VersatiaModuleReloadResultImpl implements VersatiaModuleReloadResul
     @Override
     public Set<String> getReloadedSubmodulesNames() {
         return reloadedSubmodulesNamesUnmodifable;
+    }
+    
+    @Override
+    public Set<String> getSubmodulesNamesReloadingError() {
+    	return errorSubmodulesNames;
     }
 
     @Override
@@ -25,6 +31,11 @@ public class VersatiaModuleReloadResultImpl implements VersatiaModuleReloadResul
     public void reloaded(String key) {
         reloadedSubmodulesNames.add(key);
     }
+    
+    public void reloadingError(String key) {
+    	errorSubmodulesNames.add(key);
+    }
+    
     public void unknownName(String key) {
         unknownSubmodulesNames.add(key);
     }

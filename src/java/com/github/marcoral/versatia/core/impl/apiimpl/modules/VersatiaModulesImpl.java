@@ -1,28 +1,60 @@
 package com.github.marcoral.versatia.core.impl.apiimpl.modules;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.github.marcoral.versatia.core.api.events.VersatiaModuleLoadedEvent;
 import com.github.marcoral.versatia.core.api.modules.VersatiaModule;
-import com.github.marcoral.versatia.core.api.modules.VersatiaModuleBuilder;
+import com.github.marcoral.versatia.core.api.modules.VersatiaModuleInitializer;
 import com.github.marcoral.versatia.core.api.modules.submodules.VersatiaModules;
 
 public class VersatiaModulesImpl extends VersatiaModules {
-    private ModulesManager manager;
+    private final Logger versatiaLogger;
+    
+    private final Map<String, VersatiaModuleImpl> modules = new HashMap<>();
     public VersatiaModulesImpl(Logger versatiaLogger) {
-        this.manager = new ModulesManager(versatiaLogger);
+        this.versatiaLogger = versatiaLogger;
+    }
+    
+    public void _internal_buildImpl(VersatiaModuleImpl underlyingModule, String pluginName, Consumer<VersatiaModuleInitializer> preInitialization, Consumer<VersatiaModuleInitializer> postInitialization) {
+		VersatiaModuleInitializerImpl initializer = new VersatiaModuleInitializerImpl(underlyingModule);
+		putModule(pluginName, underlyingModule);
+		underlyingModule.regenerateConfiguration();
+		preInitialization.accept(initializer);
+		underlyingModule.addDefaultSubmodules();
+		postInitialization.accept(initializer);
+		underlyingModule.validate();
+        Bukkit.getPluginManager().callEvent(new VersatiaModuleLoadedEvent(underlyingModule));
     }
 
-    public VersatiaModuleBuilder createBuilderForImpl(JavaPlugin plugin) {
-        return new VersatiaModuleBuilderImpl(plugin, manager);
+	@Override
+	protected void buildImpl(JavaPlugin plugin, Consumer<VersatiaModuleInitializer> initialization) {
+		_internal_buildImpl(new VersatiaModuleImpl(plugin), plugin.getName(), initializer -> {}, initialization);
+	}
+	
+    private void putModule(String pluginName, VersatiaModuleImpl module) {
+        if(modules.containsKey(pluginName))
+            versatiaLogger.warning(String.format("%s's VersatiaModule data was just overriden! Nag its author that he probably forgot to add VersatiaModules.invalidate() in onDisable() method.", pluginName));
+        modules.put(pluginName, module);
     }
 
-    public void invalidateImpl(JavaPlugin plugin) {
-        manager.removeModule(plugin);
+    @Override
+    protected void invalidateImpl(JavaPlugin plugin) {
+    	String pluginName = plugin.getName();
+        if(!modules.containsKey(pluginName))
+            throw new NullPointerException(String.format("%s was not registered as VersatiaModule!", pluginName));
+        if(plugin.isEnabled())
+            throw new IllegalStateException(String.format("%s can not be invalidated as it is still enabled!", pluginName));
+        modules.remove(pluginName).shutdown();
     }
 
-    public VersatiaModule getModuleImpl(String pluginName) {
-        return manager.getModule(pluginName);
+    @Override
+    protected VersatiaModule getModuleImpl(String pluginName) {
+        return modules.get(pluginName);
     }
 }

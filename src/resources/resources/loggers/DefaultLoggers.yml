@@ -1,0 +1,9 @@
+VersatiaLogger:
+  PriorityThreshold: INFO
+  PrefixFinest: $LoggersPrefixFinest$
+  PrefixFiner: $LoggersPrefixFiner$
+  PrefixFine: $LoggersPrefixFine$
+  PrefixInfo: $LoggersPrefixInfo$
+  PrefixWarning: $LoggersPrefixWarning$
+  PrefixError: $LoggersPrefixError$
+  PrefixSevere: $LoggersPrefixSevere$

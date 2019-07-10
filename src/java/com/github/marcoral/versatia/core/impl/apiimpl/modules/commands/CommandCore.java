@@ -1,116 +1,56 @@
 package com.github.marcoral.versatia.core.impl.apiimpl.modules.commands;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.bukkit.command.CommandSender;
 
 import com.github.marcoral.versatia.core.api.VersatiaConstants;
-import com.github.marcoral.versatia.core.api.colors.VersatiaChat;
 import com.github.marcoral.versatia.core.api.modules.VersatiaModule;
-import com.github.marcoral.versatia.core.api.modules.submodules.VersatiaModules;
-import com.github.marcoral.versatia.core.impl.tools.CollectionsUtils;
+import com.github.marcoral.versatia.core.api.modules.commands.VersatiaCommand;
+import com.github.marcoral.versatia.core.api.modules.messages.VersatiaMessages;
 
-public abstract class CommandCore {
-	private final VersatiaModule module;
-    private String permission;
-    private String description;
-    private String[] usageHint;
-    private String[] usageFlags;
-    private List<String> currentAliases = new ArrayList<>();
+public abstract class CommandCore<T extends VersatiaCommand> {
+	protected final VersatiaModule module;
+	protected final T descriptor;
 
-    public CommandCore(VersatiaModule module) {
+    public CommandCore(VersatiaModule module, T descriptor) {
     	this.module = module;
+    	this.descriptor = descriptor;
     }
     
-    protected VersatiaModule getModule() {
-    	return module;
-    }
-    
-    public boolean execute(CommandSender commandSender, String accessor, String[] args) {
+    public final boolean execute(CommandSender commandSender, String accessor, String[] args) {
         if(!handleConditionsCheck(commandSender, accessor, args))
             return true;
         boolean toDisplayHint = !passedConditionsCheck(commandSender, accessor, args);
         if(toDisplayHint) {
-        	if(usageHint == null)
-        		VersatiaChat.sendVersatiaMessageToCommandSender(commandSender, VersatiaModules.getModule(VersatiaConstants.VERSATIA_CORE_NAME).getMessageTemplate("GenericErrorIncorrectUse"));
+        	String[] usageHints = descriptor.getUsageHints();
+        	if(usageHints == null)
+        		VersatiaMessages.sendVersatiaMessageToCommandSender(commandSender, VersatiaConstants.VERSATIA.getMessageTemplate("CommandUseErrorIncorrectUse"));
         	else {
-        		VersatiaChat.sendVersatiaMessageToCommandSender(commandSender, VersatiaModules.getModule(VersatiaConstants.VERSATIA_CORE_NAME).getMessageTemplate("GenericErrorIncorrectUseInfo"));
-        		for(String hintTemplate : usageHint)
-            		VersatiaChat.sendVersatiaMessageToCommandSender(commandSender, module.getMessageTemplate(hintTemplate));
+        		VersatiaMessages.sendVersatiaMessageToCommandSender(commandSender, VersatiaConstants.VERSATIA.getMessageTemplate("CommandUseErrorIncorrectUseInfo"));
+        		for(String hintTemplate : usageHints)
+            		VersatiaMessages.sendVersatiaMessageToCommandSender(commandSender, module.getMessageTemplate(hintTemplate));
         	}
         	
+        	String[] usageFlags = descriptor.getUsageFlags();
         	if(usageFlags != null) {
-        		VersatiaChat.sendVersatiaMessageToCommandSender(commandSender, VersatiaModules.getModule(VersatiaConstants.VERSATIA_CORE_NAME).getMessageTemplate("GenericErrorIncorrectUseAvailableFlags"));
+        		VersatiaMessages.sendVersatiaMessageToCommandSender(commandSender, VersatiaConstants.VERSATIA.getMessageTemplate("CommandUseErrorIncorrectUseAvailableFlags"));
         		for(String flagTemplate : usageFlags)
-            		VersatiaChat.sendVersatiaMessageToCommandSender(commandSender, module.getMessageTemplate(flagTemplate));
+            		VersatiaMessages.sendVersatiaMessageToCommandSender(commandSender, module.getMessageTemplate(flagTemplate));
         	}
         }
         return true;
     }
 
     protected boolean handleConditionsCheck(CommandSender commandSender, String accessor, String[] args) {
+    	String permission = descriptor.getPermission();
         if(permission == null || commandSender.hasPermission(permission))
             return true;
-        VersatiaChat.sendVersatiaMessageToCommandSender(commandSender, VersatiaModules.getModule(VersatiaConstants.VERSATIA_CORE_NAME).getMessageTemplate("GenericErrorNoPermission"));
+        VersatiaMessages.sendVersatiaMessageToCommandSender(commandSender, VersatiaConstants.VERSATIA.getMessageTemplate("CommandUseErrorNoPermission"));
         return false;
     }
 
-    public void setPermission(String permission) {
-        this.permission = permission;
-    }
+    public abstract boolean passedConditionsCheck(CommandSender commandSender, String accessor, String[] args);
     
-	public void setDescription(String descriptionMessageTemplate) {
-		this.description = descriptionMessageTemplate;
-	}
-	
-	public void setUsageHint(String... hintMessageTemplates) {
-		this.usageHint = hintMessageTemplates;
-	}
-	
-	public void setUsageFlags(String... flagsMessageTemplates) {
-		this.usageFlags = flagsMessageTemplates;		
-	}
-	
-	public String getPermission() {
-		return permission;
-	}
-	
-	public String getDescription() {
-		return description;
-	}
-	
-	public List<String> getAliases() {
-		return currentAliases;
-	}
-
-    public final void setAliases(String... aliases) {
-        List<String> secondList = Arrays.stream(aliases).map(String::toLowerCase).collect(Collectors.toList());
-        Collection<String> removedAliases = CollectionsUtils.collectionMinus(currentAliases, secondList);
-        Collection<String> addedAliases = CollectionsUtils.collectionMinus(secondList, currentAliases);
-        try {
-            onAliasesChanged(removedAliases, addedAliases);
-            this.currentAliases = secondList;
-        } catch(AliasAlreadyExistsException e) {
-            CommandTools.throwElementAlreadyExistsException(e.getAlias());
-        }
-    }
-
-    protected abstract void onAliasesChanged(Collection<String> removedAliases, Collection<String> addedAliases) throws AliasAlreadyExistsException;
-    protected abstract boolean passedConditionsCheck(CommandSender commandSender, String accessor, String[] args);
-
-    public static class AliasAlreadyExistsException extends Exception {
-		private static final long serialVersionUID = 1L;
-		private final String alias;
-        public AliasAlreadyExistsException(String alias) {
-            this.alias = alias;
-        }
-
-        public String getAlias() {
-            return alias;
-        }
+    public T getDescriptor() {
+    	return descriptor;
     }
 }

@@ -12,10 +12,13 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.plugin.Plugin;
 
+import com.github.marcoral.versatia.core.Initializer;
+import com.github.marcoral.versatia.core.api.VersatiaConstants;
+import com.github.marcoral.versatia.core.api.configuration.VersatiaConfigurationProcessor;
 import com.github.marcoral.versatia.core.api.modules.VersatiaModule;
 import com.github.marcoral.versatia.core.api.modules.messages.VersatiaMessageEntry;
 import com.github.marcoral.versatia.core.api.modules.submodules.VersatiaModules;
@@ -25,15 +28,24 @@ import com.github.marcoral.versatia.core.impl.VersatiaCoreConstants;
 import com.github.marcoral.versatia.core.impl.algorithms.TextualNodeDependencyResolver;
 
 public class ModuleMessagesManager implements VersatiaSubmodule {
-	private File messagesDirectory;
-    private Map<String, MessageEntryImpl> templates = new HashMap<>();
+	@Override
+	public String getName() {
+		return "messages";
+	}
+
+	
+	private final File messagesDirectory;
+	private final String moduleName;
+    private final Map<String, MessageEntryImpl> templates = new HashMap<>();
     private BiConsumer<String, String> messagesProcessor;
-    public ModuleMessagesManager(File messagesDirectory) {
-        this.messagesDirectory = messagesDirectory;
+    public ModuleMessagesManager(Plugin plugin) {
+        this.messagesDirectory = new File(plugin.getDataFolder(), VersatiaConstants.Path.MESSAGES_DIRECTORY);
+        this.moduleName = plugin.getName();
     }
 
-    public void setMessageTempaltesProcessor(BiConsumer<String, String> processor) {
+    public void setMessageTemplatesProcessor(BiConsumer<String, String> processor) {
         this.messagesProcessor = processor;
+        reload();
     }
     
     public VersatiaMessageEntry getTemplate(String key) {
@@ -45,27 +57,28 @@ public class ModuleMessagesManager implements VersatiaSubmodule {
      */
 
     @Override
-    public void reload() {
-    	final String VALUE_KEY = "Value";
-    	
+    public void unload() {
         templates.clear();
-        File[] messagesFiles = messagesDirectory.listFiles();
-        if(messagesFiles == null)
-            return;
+    }
+    
+    @Override
+    public void load() {
+    	final String VALUE_KEY = "Value";
         try {
             TextualNodeDependencyResolver<String> resolver = new TextualNodeDependencyResolver<>();
 			Files.walkFileTree(messagesDirectory.toPath(), new SimpleFileVisitor<Path>() {
 				@Override
 				public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
-					FileConfiguration config = YamlConfiguration.loadConfiguration(path.toFile());
-		            config.getKeys(false).forEach(key -> {
+					FileConfiguration configFile = YamlConfiguration.loadConfiguration(path.toFile());
+					VersatiaConfigurationProcessor config = VersatiaTools.wrapConfigurationToVersatiaProcessor(configFile);
+		            configFile.getKeys(false).forEach(key -> {
 		            	MessageEntryImpl entry = new MessageEntryImpl(key);
 		            	String value;
-		            	if(!config.isConfigurationSection(key))
-		            		value = VersatiaTools.getVersatiaString(config.getString(key));
+		            	if(!configFile.isConfigurationSection(key))
+		            		value = VersatiaTools.getVersatiaString(configFile.getString(key));
 		            	else {
-		            		ConfigurationSection subsection = config.getConfigurationSection(key);
-		            		value = VersatiaTools.getVersatiaString(subsection.getString(VALUE_KEY));
+		            		VersatiaConfigurationProcessor subsection = config.getConfigurationSection(key);
+		            		value = VersatiaTools.getVersatiaString(subsection.getStringOrThrow(VALUE_KEY, "No \"Value\" key found! It was supposed to contain message template."));
 		            		for(String propKey : subsection.getKeys(false))
 		            			if(!propKey.equals(VALUE_KEY))
 		            				entry.setMetadataObject(propKey, subsection.get(propKey));
@@ -80,6 +93,7 @@ public class ModuleMessagesManager implements VersatiaSubmodule {
 				}
 			});
 	        resolver.resolve((key, value) -> templates.get(key).setTemplateString(value));
+	        Initializer.logIfPossible(logger -> logger.finest("TotalLoadedMessageTemplates", moduleName, templates.size()));
 		} catch (IOException e) {
 			throw new RuntimeException("An error occurred when scanning for message templates!");
 		}
@@ -90,14 +104,18 @@ public class ModuleMessagesManager implements VersatiaSubmodule {
         StringBuffer buffer = new StringBuffer();
         while(matcher.find()) {
             String referencedModuleName = matcher.group(1);
-            String referencedNode = matcher.group(2);
+            String referencedNode = matcher.group(3);
+            
+            //That means that in fact no referenced module name was found
+            if(referencedNode == null)
+            	continue;
+
             VersatiaModule module = VersatiaModules.getModule(referencedModuleName);
             if(module == null)
                 throw new RuntimeException(String.format("Referenced unknown module: %s! Have you added it as a dependency?", referencedModuleName));
             String referencedText = module.getMessageTemplate(referencedNode);
             if(referencedText == null)
                 throw new RuntimeException(String.format("No message node have been found: %s", matcher.group(0)));
-            matcher.group();
             matcher.appendReplacement(buffer, referencedText);
         }
         matcher.appendTail(buffer);

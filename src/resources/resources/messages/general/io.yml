@@ -1,0 +1,5 @@
+# {0} - module name
+ResourcesUnpackingError: "&&ce.An exception was caught when unpacking resource files from plugin &&ceh.{0}&&ce."
+
+# {0} - file path
+ResourceUnpacked: "&&cs.Unpacked resource to &&csh.{0}"

@@ -1,11 +1,45 @@
-package com.github.marcoral.versatia.core.impl.coreimpl.commands;
+package com.github.marcoral.versatia.core.impl.coreimpl.commands.versatia;
 
 import com.github.marcoral.versatia.core.api.modules.VersatiaModule;
 import com.github.marcoral.versatia.core.api.modules.commands.VersatiaCommandContext;
-import com.github.marcoral.versatia.core.api.modules.commands.VersatiaCommandHandler;
+import com.github.marcoral.versatia.core.api.modules.commands.VersatiaGenericCommand;
 import com.github.marcoral.versatia.core.api.modules.submodules.VersatiaModules;
+import com.github.marcoral.versatia.core.impl.VersatiaCoreConstants;
 
-public class ConfigurationRegenerateCommand implements VersatiaCommandHandler {
+public class CoreCommandConfigurationRegenerate implements VersatiaGenericCommand {
+	@Override
+	public String getName() {
+		return "regenerate";
+	}
+	
+	@Override
+	public String[] getAliases() {
+		return new String[] {"regen"};
+	}
+	
+	@Override
+	public String getDescription() {
+		return "RegenerateDescription";
+	}
+	
+	@Override
+	public String getPermission() {
+		return VersatiaCoreConstants.Permissions.COMMAND_REGENERATE;
+	}
+	
+	@Override
+	public String[] getUsageHints() {
+		return new String[] {"RegenerateUsageHint"};
+	}
+	
+	@Override
+	public String[] getUsageFlags() {
+		return new String[] {"RegenerateUsageFlags"};
+	}
+	
+	
+	
+	
 	@Override
 	public boolean invoked(VersatiaCommandContext context) {
 		int argsCount = context.getArgsCount();

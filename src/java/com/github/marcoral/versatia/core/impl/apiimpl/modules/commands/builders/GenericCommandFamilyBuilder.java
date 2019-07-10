@@ -1,44 +1,27 @@
 package com.github.marcoral.versatia.core.impl.apiimpl.modules.commands.builders;
 
-import org.bukkit.command.CommandSender;
-
 import com.github.marcoral.versatia.core.api.modules.VersatiaModule;
-import com.github.marcoral.versatia.core.api.modules.commands.VersatiaCommandBuilder;
+import com.github.marcoral.versatia.core.api.modules.commands.VersatiaCommand;
 import com.github.marcoral.versatia.core.api.modules.commands.VersatiaCommandFamilyBuilder;
-import com.github.marcoral.versatia.core.api.modules.commands.VersatiaCommandHandler;
-import com.github.marcoral.versatia.core.impl.apiimpl.modules.commands.AbstractCommandFamily;
-import com.github.marcoral.versatia.core.impl.apiimpl.modules.commands.AbstractIntermediateCommand;
-import com.github.marcoral.versatia.core.impl.apiimpl.modules.commands.CommandContextImpl;
+import com.github.marcoral.versatia.core.api.modules.commands.VersatiaGenericCommand;
+import com.github.marcoral.versatia.core.impl.apiimpl.modules.commands.CommandFamily;
+import com.github.marcoral.versatia.core.impl.apiimpl.modules.commands.GenericCommandCore;
+import com.github.marcoral.versatia.core.impl.apiimpl.modules.commands.GenericCommandFamily;
 
 public class GenericCommandFamilyBuilder extends PlayerCommandFamilyBuilder implements VersatiaCommandFamilyBuilder {
-    public GenericCommandFamilyBuilder(VersatiaModule module, AbstractCommandFamily parent) {
-        super(module, parent);
-    }
+	public GenericCommandFamilyBuilder(VersatiaModule module, CommandFamily family) {
+		super(module, family);
+	}
 
-    @Override
-    public VersatiaCommandFamilyBuilder withPermission(String permission) {
-        return (VersatiaCommandFamilyBuilder) super.withPermission(permission);
-    }
+	@Override
+	public VersatiaCommandFamilyBuilder registerCommandsFamily(VersatiaCommand commandDescriptor) {
+    	CommandFamily newFamily = new GenericCommandFamily(module, commandDescriptor, family.getNestingLevel() + 1);
+    	family.addChild(newFamily.getCore());
+    	return new GenericCommandFamilyBuilder(module, newFamily);
+	}
 
-    @Override
-    public VersatiaCommandFamilyBuilder withAliases(String... aliases) {
-        return (VersatiaCommandFamilyBuilder) super.withAliases(aliases);
-    }
-
-    @Override
-    public VersatiaCommandFamilyBuilder registerCommandsFamily(String name) {
-        return registerNewBuilder(name, currentFamily -> new AbstractIntermediateCommandFamily(name, currentFamily), family -> new GenericCommandFamilyBuilder(getModule(), family));
-    }
-
-    @Override
-    public VersatiaCommandBuilder registerCommand(String name, VersatiaCommandHandler handler) {
-        return registerNewBuilder(name,
-                family -> new AbstractIntermediateCommand(getModule(), family) {
-                    @Override
-                    protected boolean passedConditionsCheck(CommandSender commandSender, String accessor, String[] args) {
-                        return handler.invoked(new CommandContextImpl(getModule(), commandSender, args, family.getNestingLevel() + 1));
-                    }
-                },
-                CommandBuilder::new);
-    }
+	@Override
+	public void registerCommand(VersatiaGenericCommand command) {
+		family.addChild(new GenericCommandCore(module, command, family.getNestingLevel() + 1));		
+	}
 }

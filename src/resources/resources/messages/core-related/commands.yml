@@ -12,10 +12,12 @@ ReloadUsageHint: "^csch.<command> <module name> [submodule names...]"
 #{0} stands for module name, {1} stand for reloaded submodules count
 ReloadSuccess: "^css.Reloaded module ^cssh.{0}^css. with total of ^cssh.{1}^css. submodule(s)."
 
-ReloadErrorFoundUnknownSubmodules: "^cse.Anyway I couldn't handle below arguments:"
+ReloadErrorFoundUnknownSubmodules: "^cse.I couldn't handle below arguments:"
+
+ReloadError: "^cse.Anyway an error occurred when reloading modules from the list below:"
 
 #{0} stands for module name
-ReloadErrorNoSubmoduleFound: "^cse.- ^cseh.{0}"
+ReloadErrorSubmoduleName: "^cse.- ^cseh.{0}"
 
 
 ###########################

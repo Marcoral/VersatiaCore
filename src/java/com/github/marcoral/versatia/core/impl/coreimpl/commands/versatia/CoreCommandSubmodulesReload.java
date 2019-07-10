@@ -1,14 +1,40 @@
-package com.github.marcoral.versatia.core.impl.coreimpl.commands;
+package com.github.marcoral.versatia.core.impl.coreimpl.commands.versatia;
 
 import java.util.Set;
 
 import com.github.marcoral.versatia.core.api.modules.VersatiaModule;
 import com.github.marcoral.versatia.core.api.modules.commands.VersatiaCommandContext;
-import com.github.marcoral.versatia.core.api.modules.commands.VersatiaCommandHandler;
+import com.github.marcoral.versatia.core.api.modules.commands.VersatiaGenericCommand;
 import com.github.marcoral.versatia.core.api.modules.submodules.VersatiaModuleReloadResult;
 import com.github.marcoral.versatia.core.api.modules.submodules.VersatiaModules;
+import com.github.marcoral.versatia.core.impl.VersatiaCoreConstants;
 
-public class SubmodulesReloadCommand implements VersatiaCommandHandler {
+public class CoreCommandSubmodulesReload implements VersatiaGenericCommand {
+	@Override
+	public String getName() {
+		return "reload";
+	}
+	
+	@Override
+	public String[] getAliases() {
+		return new String[] {"rel"};
+	}
+	
+	@Override
+	public String getDescription() {
+		return "ReloadDescription";
+	}
+	
+	@Override
+	public String getPermission() {
+		return VersatiaCoreConstants.Permissions.COMMAND_RELOAD;
+	}
+	
+	@Override
+	public String[] getUsageHints() {
+		return new String[] {"ReloadUsageHint"};
+	}
+		
 	@Override
 	public boolean invoked(VersatiaCommandContext context) {
 		if(context.getArgsCount() == 0)
@@ -41,7 +67,13 @@ public class SubmodulesReloadCommand implements VersatiaCommandHandler {
 		Set<String> unknownNames = result.getUnknownSubmodulesNames();
 		if(unknownNames.size() > 0) {
 			context.replyToExecutor("ReloadErrorFoundUnknownSubmodules");
-			unknownNames.forEach(unknownName -> context.replyToExecutor("ReloadErrorNoSubmoduleFound", unknownName));
+			unknownNames.forEach(unknownName -> context.replyToExecutor("ReloadErrorSubmoduleName", unknownName));
+		}
+		
+		Set<String> errorNames = result.getSubmodulesNamesReloadingError();
+		if(errorNames.size() > 0) {
+			context.replyToExecutor("ReloadError");
+			errorNames.forEach(unknownName -> context.replyToExecutor("ReloadErrorSubmoduleName", unknownName));
 		}
 	}
 }

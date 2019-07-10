@@ -1,7 +1,3 @@
-PrefixPlayer: "&&bch&l[&&bcVersatia&&bch&l] " #&&p_pfx.
-PrefixBroadcast: "" #&&b_pfx.
-PrefixConsole: "" #&&c_pfx.
-
 BroadcastCasual: "&e" #&&bc.
 BroadcastCasualHighlighted: "&6" #&&bch.
 BroadcastError: "&4" #&&be.
@@ -9,14 +5,21 @@ BroadcastErrorHighlighted: "&c" #&&beh.
 BroadcastSuccess: "&2" #&&bs.
 BroadcastSuccessHighlighted: "&a" #&&bsh.
 
-ToPlayerCasual: "&7" #&&pc.
-ToPlayerCasualHighlighted: "&f" #&&pch.
-ToPlayerError: "&4" #&&pe.
-ToPlayerErrorHighlighted: "&c" #&&peh.
-ToPlayerSuccess: "&2" #&&ps.
-ToPlayerSuccessHighlighted: "&a" #&&psh.
+PlayerCasual: "&3" #&&pc.
+PlayerCasualHighlighted: "&b" #&&pch.
+PlayerError: "&5" #&&pe.
+PlayerErrorHighlighted: "&d" #&&peh.
+PlayerSuccess: "&5" #&&ps.
+PlayerSuccessHighlighted: "&d" #&&psh.
 
-ConsoleCasual: "&6" #&&cc.
+PlayerCommandCasual: "&7" #&&pcc.
+PlayerCommandCasualHighlighted: "&f" #&&pcch.
+PlayerCommandError: "&4" #&&pce.
+PlayerCommandErrorHighlighted: "&c" #&&pceh.
+PlayerCommandSuccess: "&2" #&&pcs.
+PlayerCommandSuccessHighlighted: "&a" #&&pcsh.
+
+ConsoleCasual: "&f" #&&cc.
 ConsoleCasualHighlighted: "&e" #&&cch.
 ConsoleError: "&4" #&&ce.
 ConsoleErrorHighlighted: "&c" #&&ceh.
