@@ -9,12 +9,15 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.github.marcoral.versatia.core.Initializer;
+import com.github.marcoral.versatia.core.api.VersatiaConstants;
 import com.github.marcoral.versatia.core.api.configuration.VersatiaConfigurationProcessor;
 import com.github.marcoral.versatia.core.api.modules.VersatiaModule;
 import com.github.marcoral.versatia.core.api.modules.loggers.LoggingPriority;
@@ -31,13 +34,11 @@ public class ModuleLoggersManager implements VersatiaSubmodule {
 	
 	
 	private final File loggersDirectory;
-	private final String moduleName;
 	private final VersatiaModule parent;
 	
     private final Map<String, VersatiaLogger> loggers = new HashMap<>();
-    public ModuleLoggersManager(File loggersDirectory, String moduleName, VersatiaModule parent) {
-        this.loggersDirectory = loggersDirectory;
-        this.moduleName = moduleName;
+    public ModuleLoggersManager(VersatiaModule parent) {
+        this.loggersDirectory = new File(parent.getCorrespondingPlugin().getDataFolder(), VersatiaConstants.Path.LOGGERS_DIRECTORY);
         this.parent = parent;
     }
     
@@ -55,14 +56,21 @@ public class ModuleLoggersManager implements VersatiaSubmodule {
     }
 	
 	@Override
-	public void load() {    	
+	public void load() {
+        if(!loggersDirectory.exists())
+        	return;
         try {
+            Set<String> keys = new HashSet<>();
 			Files.walkFileTree(loggersDirectory.toPath(), new SimpleFileVisitor<Path>() {
 				@Override
 				public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
 					FileConfiguration configFile = YamlConfiguration.loadConfiguration(path.toFile());
             		VersatiaConfigurationProcessor config = VersatiaTools.wrapConfigurationToVersatiaProcessor(configFile);
 					configFile.getKeys(false).forEach(loggerName -> {
+						boolean unique = keys.add(loggerName);
+		                if(!unique)
+		                    throw new RuntimeException(String.format("There is more than 1 logger named \"%s\"!", loggerName));
+						
 						VersatiaLogger newLogger;
 
 		            	if(!configFile.isConfigurationSection(loggerName)) {
@@ -75,14 +83,15 @@ public class ModuleLoggersManager implements VersatiaSubmodule {
 		            		newLogger = new LoggerImpl(threshold, descriptors, parent);
 		            	}
 						
-		            	Initializer.logIfPossible(logger -> logger.finest("LoggerRegistered", moduleName, loggerName));
+		            	Initializer.logIfPossible(logger -> logger.finest("LoggerRegistered", parent.getCorrespondingPlugin().getName(), loggerName));
 						loggers.put(loggerName, newLogger);
 					});
 					return FileVisitResult.CONTINUE;
 				}
 			});
 		} catch (IOException e) {
-			throw new RuntimeException("An error occurred when scanning for message templates!");
+			e.printStackTrace();
+			throw new RuntimeException("An error occurred when scanning for loggers!");
 		}
 	}
 	

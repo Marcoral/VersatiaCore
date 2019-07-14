@@ -14,6 +14,7 @@ import com.github.marcoral.versatia.core.api.modules.loggers.VersatiaLoggers;
 import com.github.marcoral.versatia.core.api.modules.messages.VersatiaMessages;
 import com.github.marcoral.versatia.core.api.modules.submodules.VersatiaModules;
 import com.github.marcoral.versatia.core.api.tools.VersatiaTools;
+import com.github.marcoral.versatia.core.impl.VersatiaCoreConstants;
 import com.github.marcoral.versatia.core.impl.apiimpl.colors.CoreSubmoduleColors;
 import com.github.marcoral.versatia.core.impl.apiimpl.modules.CoreModuleImpl;
 import com.github.marcoral.versatia.core.impl.apiimpl.modules.VersatiaModuleImpl;
@@ -27,25 +28,15 @@ import com.github.marcoral.versatia.core.impl.coreimpl.commands.versatia.CoreCom
 import com.github.marcoral.versatia.core.impl.coreimpl.commands.versatia.CoreCommandCoreSubmodulesReload;
 import com.github.marcoral.versatia.core.impl.coreimpl.commands.versatia.CoreCommandSubmodulesReload;
 
-//Uwaga: Niniejszy kod został napisany przez Polskiego pojeba, informatyka czyt. Marcin Polak
-//Z zainteresowania pasjonat informatyki, ale w rzeczywistości to po prostu jebany ochlapus, kroczek nie ma nawet podskoku do tego Pana
-//Bardzo często coś klepie, ale zazwyczaj to po prostu nie wychodzi, MaRPG - spalone swoja droga... dygu dyg! - strzeżcie się olbrzymy nadchodzę!
-//Jeśli ma zamiar przeczytać to ktoś oprócz Marcina z historii commitów - to tylko żarty spokojnie, mogę tego pana polecić
-//~Paweł Dębiński (pseudonim luxdevpl)
-
-//Uwaga: Niniejszy kod został napisany przez Polskiego pojeba, informatyka czyt. Marcin Polak
-//Z zainteresowania pasjonat informatyki, ale w rzeczywistości to po prostu jebany ochlapus, kroczek nie ma nawet podskoku do tego Pana
-//Bardzo często coś klepie, ale zazwyczaj to po prostu nie wychodzi, MaRPG - spalone swoja droga... dygu dyg! - strzeżcie się olbrzymy nadchodzę!
-//Jeśli ma zamiar przeczytać to ktoś oprócz Marcina z historii commitów - to tylko żarty spokojnie, mogę tego pana polecić
-//~Paweł Dębiński (pseudonim luxdevpl)
 
 public class Initializer extends JavaPlugin {
 	private final InitializerSubmoduleProperty loggerProperty = new InitializerSubmoduleProperty();
 	
 	private static Initializer INSTANCE;
 	public static void logIfPossible(Consumer<VersatiaLogger> action) {
+		//Do not use VersatiaLoggers.getDefaultLogger() yet
 		if(INSTANCE.loggerProperty.isSetUp())
-			action.accept(VersatiaLoggers.getDefaultLogger());
+			action.accept(VersatiaConstants.VERSATIA.getLogger(VersatiaCoreConstants.Names.PRIMARY_LOGGER));
 	}
 	
 	@Override
@@ -71,11 +62,13 @@ public class Initializer extends JavaPlugin {
 	}
 
 	private void registerAsModule(VersatiaModuleImpl module, VersatiaModulesImpl modulesManager) {
-		modulesManager._internal_buildImpl(module, getName(),
+		modulesManager._internal_buildImpl(module,
 			initializer -> {
 				registerMessagesColors(initializer);
 			},
 			initializer -> {
+				VersatiaTools.injectExternalDependency(VersatiaLoggers.class, null, "PRIMARY_LOGGER",
+						module.getLogger(VersatiaCoreConstants.Names.PRIMARY_LOGGER), true);	//Optimization
 				registerCommands(initializer);
 			});
 	}

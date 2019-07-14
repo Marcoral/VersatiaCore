@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -21,9 +22,9 @@ public class VersatiaModulesImpl extends VersatiaModules {
         this.versatiaLogger = versatiaLogger;
     }
     
-    public void _internal_buildImpl(VersatiaModuleImpl underlyingModule, String pluginName, Consumer<VersatiaModuleInitializer> preInitialization, Consumer<VersatiaModuleInitializer> postInitialization) {
+    public void _internal_buildImpl(VersatiaModuleImpl underlyingModule, Consumer<VersatiaModuleInitializer> preInitialization, Consumer<VersatiaModuleInitializer> postInitialization) {
 		VersatiaModuleInitializerImpl initializer = new VersatiaModuleInitializerImpl(underlyingModule);
-		putModule(pluginName, underlyingModule);
+		putModule(underlyingModule);
 		underlyingModule.regenerateConfiguration();
 		preInitialization.accept(initializer);
 		underlyingModule.addDefaultSubmodules();
@@ -34,10 +35,11 @@ public class VersatiaModulesImpl extends VersatiaModules {
 
 	@Override
 	protected void buildImpl(JavaPlugin plugin, Consumer<VersatiaModuleInitializer> initialization) {
-		_internal_buildImpl(new VersatiaModuleImpl(plugin), plugin.getName(), initializer -> {}, initialization);
+		_internal_buildImpl(new VersatiaModuleImpl(plugin), initializer -> {}, initialization);
 	}
 	
-    private void putModule(String pluginName, VersatiaModuleImpl module) {
+    private void putModule(VersatiaModuleImpl module) {
+    	String pluginName = module.getCorrespondingPlugin().getName();
         if(modules.containsKey(pluginName))
             versatiaLogger.warning(String.format("%s's VersatiaModule data was just overriden! Nag its author that he probably forgot to add VersatiaModules.invalidate() in onDisable() method.", pluginName));
         modules.put(pluginName, module);
@@ -57,4 +59,9 @@ public class VersatiaModulesImpl extends VersatiaModules {
     protected VersatiaModule getModuleImpl(String pluginName) {
         return modules.get(pluginName);
     }
+
+	@Override
+	protected Stream<? extends VersatiaModule> getModulesStreamImpl() {
+		return modules.values().stream();
+	}
 }

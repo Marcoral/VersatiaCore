@@ -8,7 +8,9 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 
@@ -64,14 +66,20 @@ public class ModuleMessagesManager implements VersatiaSubmodule {
     @Override
     public void load() {
     	final String VALUE_KEY = "Value";
+        if(!messagesDirectory.exists())
+        	return;
         try {
             TextualNodeDependencyResolver<String> resolver = new TextualNodeDependencyResolver<>();
+            Set<String> keys = new HashSet<>();
 			Files.walkFileTree(messagesDirectory.toPath(), new SimpleFileVisitor<Path>() {
 				@Override
 				public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
 					FileConfiguration configFile = YamlConfiguration.loadConfiguration(path.toFile());
 					VersatiaConfigurationProcessor config = VersatiaTools.wrapConfigurationToVersatiaProcessor(configFile);
 		            configFile.getKeys(false).forEach(key -> {
+		            	boolean unique = keys.add(key);
+		                if(!unique)
+		                    throw new RuntimeException(String.format("There is more than 1 template which uses key %s!", key));
 		            	MessageEntryImpl entry = new MessageEntryImpl(key);
 		            	String value;
 		            	if(!configFile.isConfigurationSection(key))
@@ -95,6 +103,7 @@ public class ModuleMessagesManager implements VersatiaSubmodule {
 	        resolver.resolve((key, value) -> templates.get(key).setTemplateString(value));
 	        Initializer.logIfPossible(logger -> logger.finest("TotalLoadedMessageTemplates", moduleName, templates.size()));
 		} catch (IOException e) {
+			e.printStackTrace();
 			throw new RuntimeException("An error occurred when scanning for message templates!");
 		}
     }

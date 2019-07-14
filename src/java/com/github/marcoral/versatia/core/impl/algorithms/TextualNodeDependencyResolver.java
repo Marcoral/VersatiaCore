@@ -7,8 +7,7 @@ public class TextualNodeDependencyResolver<K> {
     //Building graph
     private Map<K, Node> nodes = new HashMap<>();
     public void newEntry(K key, String value, String referenceKey) {
-        if(nodes.put(key, new Node(key, value, referenceKey)) != null)
-            throw new RuntimeException(String.format("There is more than 1 template which uses key %s!", key));
+        nodes.put(key, new Node(key, value, referenceKey));
     }
 
     //Solving graph

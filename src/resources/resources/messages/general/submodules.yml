@@ -19,11 +19,11 @@ SubmoduleUnknown: "&&ce.Requested reload of unknown submodule: ''&&ceh.{1}&&ce.'
 
 # {0} - module name
 # {1} - submodule name
-RequestedSubmoduleAdd: "&&cc.Module &&cch.{0}&&cc. tries to register submodule: &cch.{1}"
+RequestedSubmoduleAdd: "&&cc.Module &&cch.{0}&&cc. tries to register submodule: &&cch.{1}"
 
 # {0} - module name
 # {1} - group name
-RequestedSubmodulesGroupAdd: "&&cc.Module &&cch.{0}&&cc. tries to register submodules group: &cch.{1}"
+RequestedSubmodulesGroupAdd: "&&cc.Module &&cch.{0}&&cc. tries to register submodules group: &&cch.{1}"
 
 # {0} - module name
 # {1} - submodule name
@@ -35,7 +35,7 @@ SubmoduleAddedSuccessfully: "&&cs.Module &&csh.{0}&&cs. registered submodule: &&
 
 # {0} - module name
 # {1} - submodule name
-SubmodulesGroupFormed: "&&cc.Module &&cch.{0}&&cc. formed submodules group: &cch.{1}"
+SubmodulesGroupFormed: "&&cc.Module &&cch.{0}&&cc. formed submodules group: &&cch.{1}"
 
 # {0} - module name
 # {1} - group name

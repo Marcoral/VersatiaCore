@@ -11,6 +11,7 @@ import com.github.marcoral.versatia.core.api.modules.commands.VersatiaCommandFam
 import com.github.marcoral.versatia.core.api.modules.commands.VersatiaGenericCommand;
 import com.github.marcoral.versatia.core.api.modules.commands.VersatiaPlayerCommand;
 import com.github.marcoral.versatia.core.api.modules.commands.VersatiaPlayerCommandFamilyBuilder;
+import com.github.marcoral.versatia.core.api.modules.loggers.LoggingPriority;
 import com.github.marcoral.versatia.core.api.modules.loggers.VersatiaLogger;
 import com.github.marcoral.versatia.core.api.modules.submodules.VersatiaSubmodule;
 
@@ -79,6 +80,11 @@ public class VersatiaModuleInitializerImpl implements VersatiaModuleInitializer 
 	@Override
 	public VersatiaLogger getLogger(String loggerKey) {
 		return underlyingModule.getLogger(loggerKey);
+	}
+	
+	@Override
+	public void log(LoggingPriority priority, String messageTemplateName, Object... args) {
+		underlyingModule.log(priority, messageTemplateName, args);	
 	}
 	
 	@Override

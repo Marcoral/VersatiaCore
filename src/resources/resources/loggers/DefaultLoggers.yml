@@ -1,4 +1,4 @@
-VersatiaLogger:
+PrimaryLogger:
   PriorityThreshold: INFO
   PrefixFinest: $LoggersPrefixFinest$
   PrefixFiner: $LoggersPrefixFiner$

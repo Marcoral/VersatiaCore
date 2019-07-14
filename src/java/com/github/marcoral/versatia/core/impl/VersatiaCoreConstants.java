@@ -3,6 +3,10 @@ package com.github.marcoral.versatia.core.impl;
 import java.util.regex.Pattern;
 
 public class VersatiaCoreConstants {
+	public static class Names {
+		public static final String PRIMARY_LOGGER = "PrimaryLogger";
+	}
+	
     public static class Paths {
         public static final String COLORCODDES = "colorcodes.yml";
     }
