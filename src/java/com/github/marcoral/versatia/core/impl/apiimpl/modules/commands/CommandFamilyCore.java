@@ -1,11 +1,11 @@
 package com.github.marcoral.versatia.core.impl.apiimpl.modules.commands;
 
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
+import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 
 import com.github.marcoral.versatia.core.api.VersatiaConstants;
@@ -73,19 +73,31 @@ public class CommandFamilyCore extends CommandCore<VersatiaCommand> {
     }
     
     private String formatCommandDisplay(String commandName, VersatiaCommand descriptor) {
-		Collection<String> aliases = Arrays.asList(descriptor.getAliases());
-		if(aliases.size() == 0)
+    	String[] aliases = descriptor.getAliases();
+		if(aliases == null || aliases.length == 0)
 			return commandName;
 		StringBuilder result = new StringBuilder(commandName).append(" (");
-		Iterator<String> aliasesIterator = aliases.iterator();
-		for(int i = 0; i < aliases.size() - 1; ++i)
-			result.append(aliasesIterator.next()).append(", ");
-		result.append(aliasesIterator.next()).append(")");
+		for(int i = 0; i < aliases.length - 1; ++i)
+			result.append(aliases[i]).append(", ");
+		result.append(aliases[aliases.length - 1]).append(")");
 		return result.toString();
     }
 	
 	@Override
-	public boolean passedConditionsCheck(CommandSender commandSender, String accessor, String[] args) {
-        return children.get(args[nestingLevel].toLowerCase()).execute(commandSender, accessor, args);
+	public boolean passedExecutionConditionsCheck(CommandSender commandSender, String accessor, String[] args) {
+        return getNextChild(args).execute(commandSender, accessor, args);
+	}
+	
+	@Override
+	public List<String> passedTabCompletionConditionsCheck(CommandSender commandSender, String accessor, String[] args, Location location) {
+		CommandCore<?> child = getNextChild(args);
+		if(child == null)
+			return new ArrayList<>(rootChildren.keySet());
+		else
+			return child.tabComplete(commandSender, accessor, args, location);
+	}
+	
+	private CommandCore<?> getNextChild(String[] args) {
+		return children.get(args[nestingLevel].toLowerCase());
 	}
 }

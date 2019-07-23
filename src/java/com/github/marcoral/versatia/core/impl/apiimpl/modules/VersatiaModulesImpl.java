@@ -2,6 +2,7 @@ package com.github.marcoral.versatia.core.impl.apiimpl.modules;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -9,10 +10,13 @@ import java.util.stream.Stream;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.github.marcoral.versatia.core.api.events.VersatiaModuleInvalidatedEvent;
 import com.github.marcoral.versatia.core.api.events.VersatiaModuleLoadedEvent;
 import com.github.marcoral.versatia.core.api.modules.VersatiaModule;
 import com.github.marcoral.versatia.core.api.modules.VersatiaModuleInitializer;
 import com.github.marcoral.versatia.core.api.modules.submodules.VersatiaModules;
+import com.github.marcoral.versatia.core.api.tools.modules.VersatiaSubmoduleHandlerProvider;
+import com.github.marcoral.versatia.core.impl.apiimpl.modules.submodules.ModuleSubmodulesManager;
 
 public class VersatiaModulesImpl extends VersatiaModules {
     private final Logger versatiaLogger;
@@ -52,8 +56,17 @@ public class VersatiaModulesImpl extends VersatiaModules {
             throw new NullPointerException(String.format("%s was not registered as VersatiaModule!", pluginName));
         if(plugin.isEnabled())
             throw new IllegalStateException(String.format("%s can not be invalidated as it is still enabled!", pluginName));
-        modules.remove(pluginName).shutdown();
+        VersatiaModuleImpl module = modules.remove(pluginName);
+        module.shutdown();
+        ModuleSubmodulesManager.unregisterEverySubmoduleHandlerProviders(module.getCorrespondingPlugin());
+        Bukkit.getPluginManager().callEvent(new VersatiaModuleInvalidatedEvent(module));
     }
+    
+
+	@Override
+	protected <T extends VersatiaSubmoduleHandlerProvider> void registerSubmoduleHandlerProviderImpl(Class<T> interfaceClass, T provider) {
+		ModuleSubmodulesManager.registerSubmoduleHandlerProvider(interfaceClass, provider);
+	}
 
     @Override
     protected VersatiaModule getModuleImpl(String pluginName) {
@@ -63,5 +76,10 @@ public class VersatiaModulesImpl extends VersatiaModules {
 	@Override
 	protected Stream<? extends VersatiaModule> getModulesStreamImpl() {
 		return modules.values().stream();
+	}
+
+	@Override
+	protected Set<String> getModulesNamesImpl() {
+		return modules.keySet();
 	}
 }

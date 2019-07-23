@@ -1,10 +1,16 @@
 package com.github.marcoral.versatia.core.impl.coreimpl.commands.versatia;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import com.github.marcoral.versatia.core.api.VersatiaConstants;
 import com.github.marcoral.versatia.core.api.modules.VersatiaModule;
 import com.github.marcoral.versatia.core.api.modules.commands.VersatiaCommandContext;
 import com.github.marcoral.versatia.core.api.modules.commands.VersatiaGenericCommand;
+import com.github.marcoral.versatia.core.api.modules.commands.VersatiaTabCompletionContext;
 import com.github.marcoral.versatia.core.api.modules.submodules.VersatiaModuleReloadResult;
 import com.github.marcoral.versatia.core.api.modules.submodules.VersatiaModules;
 import com.github.marcoral.versatia.core.impl.VersatiaCoreConstants;
@@ -22,7 +28,7 @@ public class CoreCommandSubmodulesReload implements VersatiaGenericCommand {
 	
 	@Override
 	public String getDescription() {
-		return "ReloadDescription";
+		return "CommandReloadDescription";
 	}
 	
 	@Override
@@ -32,7 +38,7 @@ public class CoreCommandSubmodulesReload implements VersatiaGenericCommand {
 	
 	@Override
 	public String[] getUsageHints() {
-		return new String[] {"ReloadUsageHint"};
+		return new String[] {"CommandReloadUsageHint"};
 	}
 		
 	@Override
@@ -43,12 +49,34 @@ public class CoreCommandSubmodulesReload implements VersatiaGenericCommand {
 		String moduleName = context.getArgument(0);
 		VersatiaModule module = VersatiaModules.getModule(moduleName);
 		if(module == null) {
-			context.replyToExecutor("ErrorNoModuleFound", moduleName);
+			context.printModuleNotFoundMessage(moduleName);
 			return true;
 		}
 		
 		reload(module, moduleName, context, 1);
 		return true;
+	}
+	
+	@Override
+	public List<String> tabComplete(VersatiaTabCompletionContext context) {
+		switch (context.getArgsCount()) {
+			case 0:
+				return new ArrayList<>();
+			case 1:
+				return new ArrayList<>(VersatiaModules.getModulesNames());
+			default:
+				VersatiaModule module = VersatiaModules.getModule(context.getArgument(0));
+				if(module == null)
+					return Arrays.asList(new String[] {VersatiaConstants.VERSATIA.getMessageTemplate("TabCompletionErrorNoModule")});
+				else {
+					Set<String> currentSubmoduleNames = new HashSet<>();
+					for(int i = 1; i < context.getArgsCount(); ++i)
+						currentSubmoduleNames.add(context.getArgument(i));
+					Set<String> completion = new HashSet<>(module.getReloadableNames());
+					completion.removeAll(currentSubmoduleNames);
+					return new ArrayList<>(completion);
+				}
+		}
 	}
 	
 	static void reload(VersatiaModule module, String moduleName, VersatiaCommandContext context, int argsOffset) {
@@ -62,18 +90,18 @@ public class CoreCommandSubmodulesReload implements VersatiaGenericCommand {
 			result = module.reloadSubmodules(submodulesNames);
 		}
 
-		context.replyToExecutor("ReloadSuccess", moduleName, String.valueOf(result.getReloadedSubmodulesNames().size()));
+		context.replyToExecutor("CommandReloadSuccess", moduleName, String.valueOf(result.getReloadedSubmodulesNames().size()));
 
 		Set<String> unknownNames = result.getUnknownSubmodulesNames();
 		if(unknownNames.size() > 0) {
-			context.replyToExecutor("ReloadErrorFoundUnknownSubmodules");
-			unknownNames.forEach(unknownName -> context.replyToExecutor("ReloadErrorSubmoduleName", unknownName));
+			context.replyToExecutor("CommandReloadErrorFoundUnknownSubmodules");
+			unknownNames.forEach(unknownName -> context.replyToExecutor("CommandReloadErrorSubmoduleName", unknownName));
 		}
 		
 		Set<String> errorNames = result.getSubmodulesNamesReloadingError();
 		if(errorNames.size() > 0) {
-			context.replyToExecutor("ReloadError");
-			errorNames.forEach(unknownName -> context.replyToExecutor("ReloadErrorSubmoduleName", unknownName));
+			context.replyToExecutor("CommandReloadError");
+			errorNames.forEach(unknownName -> context.replyToExecutor("CommandReloadErrorSubmoduleName", unknownName));
 		}
 	}
 }

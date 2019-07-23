@@ -19,11 +19,13 @@ public class CommandFamily {
 		    throw new IllegalArgumentException(String.format("There already exist command with name \"%s\"!", commandName));
 		children.put(commandName, command);
 		rootChildren.put(commandName, command);
-		for(String alias : descriptor.getAliases()) {
-			if(children.containsKey(alias))
-			    throw new IllegalArgumentException(String.format("There already exist command with alias \"%s\"!", alias));
-			children.put(alias, command);
-		}
+		String[] aliases = descriptor.getAliases();
+		if(aliases != null)
+			for(String alias : aliases) {
+				if(children.containsKey(alias))
+				    throw new IllegalArgumentException(String.format("There already exist command with alias \"%s\"!", alias));
+				children.put(alias, command);
+			}
     }
 
 	public int getNestingLevel() {

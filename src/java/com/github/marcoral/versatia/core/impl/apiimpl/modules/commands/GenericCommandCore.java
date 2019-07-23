@@ -1,5 +1,8 @@
 package com.github.marcoral.versatia.core.impl.apiimpl.modules.commands;
 
+import java.util.List;
+
+import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 
 import com.github.marcoral.versatia.core.api.modules.VersatiaModule;
@@ -13,7 +16,12 @@ public class GenericCommandCore extends CommandCore<VersatiaGenericCommand> {
 	}
 
 	@Override
-	public boolean passedConditionsCheck(CommandSender commandSender, String accessor, String[] args) {
+	public boolean passedExecutionConditionsCheck(CommandSender commandSender, String accessor, String[] args) {
 		return descriptor.invoked(new CommandContextImpl(module, commandSender, args, argsOffset));
+	}
+
+	@Override
+	public List<String> passedTabCompletionConditionsCheck(CommandSender commandSender, String accessor, String[] args, Location location) {
+		return descriptor.tabComplete(new TabCompletionContextImpl(commandSender, args, argsOffset, location));
 	}
 }

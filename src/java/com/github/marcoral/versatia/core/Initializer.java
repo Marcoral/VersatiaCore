@@ -14,14 +14,18 @@ import com.github.marcoral.versatia.core.api.modules.loggers.VersatiaLoggers;
 import com.github.marcoral.versatia.core.api.modules.messages.VersatiaMessages;
 import com.github.marcoral.versatia.core.api.modules.submodules.VersatiaModules;
 import com.github.marcoral.versatia.core.api.tools.VersatiaTools;
+import com.github.marcoral.versatia.core.api.tools.modules.ModuleDevelopmentTools;
 import com.github.marcoral.versatia.core.impl.VersatiaCoreConstants;
 import com.github.marcoral.versatia.core.impl.apiimpl.colors.CoreSubmoduleColors;
 import com.github.marcoral.versatia.core.impl.apiimpl.modules.CoreModuleImpl;
 import com.github.marcoral.versatia.core.impl.apiimpl.modules.VersatiaModuleImpl;
 import com.github.marcoral.versatia.core.impl.apiimpl.modules.VersatiaModulesImpl;
+import com.github.marcoral.versatia.core.impl.apiimpl.modules.loggers.ModuleLoggersManagerProvider;
+import com.github.marcoral.versatia.core.impl.apiimpl.modules.messages.ModuleMessagesManagerProvider;
 import com.github.marcoral.versatia.core.impl.apiimpl.modules.messages.VersatiaMessagesImpl;
 import com.github.marcoral.versatia.core.impl.apiimpl.modules.submodules.InitializerSubmoduleProperty;
 import com.github.marcoral.versatia.core.impl.apiimpl.tools.VersatiaToolsImpl;
+import com.github.marcoral.versatia.core.impl.apiimpl.tools.modules.ModuleDevelopmentToolsImpl;
 import com.github.marcoral.versatia.core.impl.coreimpl.commands.CoreCommandFamilyVersatia;
 import com.github.marcoral.versatia.core.impl.coreimpl.commands.versatia.CoreCommandConfigurationRegenerate;
 import com.github.marcoral.versatia.core.impl.coreimpl.commands.versatia.CoreCommandCoreConfigurationRegenerate;
@@ -50,24 +54,27 @@ public class Initializer extends JavaPlugin {
 
 	private void setupAPI(VersatiaModuleImpl module, VersatiaModulesImpl modulesManager) {
 		// Setup VersatiaTools (it also provides a tool to inject another fields)
-		VersatiaToolsImpl tools = new VersatiaToolsImpl();
+		ModuleDevelopmentToolsImpl tools = new ModuleDevelopmentToolsImpl();
 		tools.injectExternalDependencyImpl(VersatiaConstants.class, null, "pluginName", getName(), true);
 		tools.injectExternalDependencyImpl(VersatiaConstants.class, null, "versatiaModule", module, true);
 
-		tools.injectExternalDependencyImpl(VersatiaTools.class, null, "INSTANCE", tools, true);
-		tools.injectExternalDependencyImpl(VersatiaMessages.class, null, "INSTANCE", new VersatiaMessagesImpl(), true);
+		tools.injectExternalDependencyImpl(ModuleDevelopmentTools.class, null, ModuleDevelopmentTools.INSTANCE_KEY, tools, true);
+		tools.injectExternalDependencyImpl(VersatiaTools.class, null, ModuleDevelopmentTools.INSTANCE_KEY, new VersatiaToolsImpl(), true);
+		tools.injectExternalDependencyImpl(VersatiaMessages.class, null, ModuleDevelopmentTools.INSTANCE_KEY, new VersatiaMessagesImpl(), true);
 
 		// Setup VersatiaModules
-		tools.injectExternalDependencyImpl(VersatiaModules.class, null, "INSTANCE", modulesManager, true);
+		tools.injectExternalDependencyImpl(VersatiaModules.class, null, ModuleDevelopmentTools.INSTANCE_KEY, modulesManager, true);
 	}
 
 	private void registerAsModule(VersatiaModuleImpl module, VersatiaModulesImpl modulesManager) {
 		modulesManager._internal_buildImpl(module,
 			initializer -> {
+				VersatiaModules.registerSubmoduleHandlerProvider(new ModuleMessagesManagerProvider(this));
+				VersatiaModules.registerSubmoduleHandlerProvider(new ModuleLoggersManagerProvider(module));
 				registerMessagesColors(initializer);
 			},
 			initializer -> {
-				VersatiaTools.injectExternalDependency(VersatiaLoggers.class, null, "PRIMARY_LOGGER",
+				ModuleDevelopmentTools.injectExternalDependency(VersatiaLoggers.class, null, "PRIMARY_LOGGER",
 						module.getLogger(VersatiaCoreConstants.Names.PRIMARY_LOGGER), true);	//Optimization
 				registerCommands(initializer);
 			});
@@ -76,7 +83,7 @@ public class Initializer extends JavaPlugin {
 	private void registerMessagesColors(VersatiaModuleInitializer initializer) {
 		CoreSubmoduleColors colorsSubmodule = new CoreSubmoduleColors(initializer);
 		initializer.addSubmodule(colorsSubmodule);
-		VersatiaTools.injectExternalDependency(VersatiaColor.class, null, "Converter", colorsSubmodule, true);
+		ModuleDevelopmentTools.injectExternalDependency(VersatiaColor.class, null, "Converter", colorsSubmodule, true);
 	}
 
 	private void registerCommands(VersatiaModuleInitializer initializer) {

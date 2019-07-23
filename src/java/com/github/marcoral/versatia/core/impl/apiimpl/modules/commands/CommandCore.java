@@ -1,5 +1,9 @@
 package com.github.marcoral.versatia.core.impl.apiimpl.modules.commands;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 
 import com.github.marcoral.versatia.core.api.VersatiaConstants;
@@ -19,7 +23,7 @@ public abstract class CommandCore<T extends VersatiaCommand> {
     public final boolean execute(CommandSender commandSender, String accessor, String[] args) {
         if(!handleConditionsCheck(commandSender, accessor, args))
             return true;
-        boolean toDisplayHint = !passedConditionsCheck(commandSender, accessor, args);
+        boolean toDisplayHint = !passedExecutionConditionsCheck(commandSender, accessor, args);
         if(toDisplayHint) {
         	String[] usageHints = descriptor.getUsageHints();
         	if(usageHints == null)
@@ -39,6 +43,13 @@ public abstract class CommandCore<T extends VersatiaCommand> {
         }
         return true;
     }
+    
+	public List<String> tabComplete(CommandSender commandSender, String lowerCase, String[] args, Location location) {
+        if(!handleTabCompletionConditionsCheck(commandSender, lowerCase, args, location))
+            return new ArrayList<>();
+        else
+        	return passedTabCompletionConditionsCheck(commandSender, lowerCase, args, location);
+	}
 
     protected boolean handleConditionsCheck(CommandSender commandSender, String accessor, String[] args) {
     	String permission = descriptor.getPermission();
@@ -47,8 +58,16 @@ public abstract class CommandCore<T extends VersatiaCommand> {
         VersatiaMessages.sendVersatiaMessageToCommandSender(commandSender, VersatiaConstants.VERSATIA.getMessageTemplate("CommandUseErrorNoPermission"));
         return false;
     }
+    
+    protected boolean handleTabCompletionConditionsCheck(CommandSender commandSender, String accessor, String[] args, Location location) {
+    	String permission = descriptor.getPermission();
+        if(permission == null || commandSender.hasPermission(permission))
+            return true;
+        return false;
+    }
 
-    public abstract boolean passedConditionsCheck(CommandSender commandSender, String accessor, String[] args);
+    public abstract boolean passedExecutionConditionsCheck(CommandSender commandSender, String accessor, String[] args);
+    public abstract List<String> passedTabCompletionConditionsCheck(CommandSender commandSender, String accessor, String[] args, Location location);
     
     public T getDescriptor() {
     	return descriptor;

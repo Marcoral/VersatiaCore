@@ -1,5 +1,8 @@
 package com.github.marcoral.versatia.core.impl.apiimpl.modules.commands;
 
+import java.util.List;
+
+import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -19,7 +22,12 @@ public class PlayerCommandCore extends CommandCore<VersatiaPlayerCommand> {
 	}
 
 	@Override
-	public boolean passedConditionsCheck(CommandSender commandSender, String accessor, String[] args) {
+	public boolean passedExecutionConditionsCheck(CommandSender commandSender, String accessor, String[] args) {
 		return descriptor.invoked(new PlayerCommandContextImpl(module, (Player) commandSender, args, argsOffset));
+	}
+
+	@Override
+	public List<String> passedTabCompletionConditionsCheck(CommandSender commandSender, String accessor, String[] args, Location location) {
+		return descriptor.tabComplete(new PlayerTabCompletionContextImpl((Player) commandSender, args, argsOffset, location));
 	}
 }

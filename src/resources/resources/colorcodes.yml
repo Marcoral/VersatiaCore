@@ -12,8 +12,8 @@ PlayerErrorHighlighted: "&d" #&&peh.
 PlayerSuccess: "&5" #&&ps.
 PlayerSuccessHighlighted: "&d" #&&psh.
 
-PlayerCommandCasual: "&7" #&&pcc.
-PlayerCommandCasualHighlighted: "&f" #&&pcch.
+PlayerCommandCasual: "&3" #&&pcc.
+PlayerCommandCasualHighlighted: "&b" #&&pcch.
 PlayerCommandError: "&4" #&&pce.
 PlayerCommandErrorHighlighted: "&c" #&&pceh.
 PlayerCommandSuccess: "&2" #&&pcs.

@@ -35,7 +35,7 @@ public class ModuleMessagesManager implements VersatiaSubmodule {
 		return "messages";
 	}
 
-	
+
 	private final File messagesDirectory;
 	private final String moduleName;
     private final Map<String, MessageEntryImpl> templates = new HashMap<>();

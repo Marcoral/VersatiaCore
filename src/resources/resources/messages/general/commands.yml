@@ -1,3 +1,8 @@
+#{0} stands for module name
+CommandErrorNoModuleFound: "^cse.No module found with name ^cseh.{0}^cse.!"
+
+TabCompletionErrorNoModule: "<Invalid module!>"
+
 CommandUseErrorNoPermission: "^cse.You don't have permission to use this command."
 CommandUseErrorNoArguments:
   Value: "^cse.You haven't specified command arguments. Valid ones are:"

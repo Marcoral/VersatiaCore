@@ -1,5 +1,7 @@
 package com.github.marcoral.versatia.core.impl.apiimpl.modules;
 
+import java.io.File;
+import java.util.Set;
 import java.util.function.BiConsumer;
 
 import org.bukkit.Bukkit;
@@ -23,29 +25,31 @@ import com.github.marcoral.versatia.core.api.modules.messages.VersatiaMessages;
 import com.github.marcoral.versatia.core.api.modules.submodules.VersatiaModuleReloadResult;
 import com.github.marcoral.versatia.core.api.modules.submodules.VersatiaSubmodule;
 import com.github.marcoral.versatia.core.api.tools.VersatiaTools;
+import com.github.marcoral.versatia.core.api.tools.modules.VersatiaSubmoduleHandlerProvider;
 import com.github.marcoral.versatia.core.impl.apiimpl.modules.commands.ModuleCommandsManager;
 import com.github.marcoral.versatia.core.impl.apiimpl.modules.loggers.ModuleLoggersManager;
+import com.github.marcoral.versatia.core.impl.apiimpl.modules.loggers.ModuleLoggersManagerProvider;
 import com.github.marcoral.versatia.core.impl.apiimpl.modules.messages.ModuleMessagesManager;
+import com.github.marcoral.versatia.core.impl.apiimpl.modules.messages.ModuleMessagesManagerProvider;
 import com.github.marcoral.versatia.core.impl.apiimpl.modules.submodules.ModuleSubmodulesManager;
 
 public class VersatiaModuleImpl implements VersatiaModule {
 	protected final Plugin plugin;
     protected final ModuleCommandsManager commandsManager;
-    protected final ModuleLoggersManager loggersManager;
-    protected final ModuleMessagesManager messagesManager;
     protected final ModuleSubmodulesManager submodulesManager;
+    
+    protected ModuleLoggersManager loggersManager;
+    protected ModuleMessagesManager messagesManager;
     
     public VersatiaModuleImpl(Plugin plugin) {
         this.plugin = plugin;
         this.commandsManager = new ModuleCommandsManager(this);
-        this.loggersManager = new ModuleLoggersManager(this);
-        this.messagesManager = new ModuleMessagesManager(plugin);
-        this.submodulesManager = new ModuleSubmodulesManager(plugin.getName());
+        this.submodulesManager = new ModuleSubmodulesManager(this);
     }
 
     public void addDefaultSubmodules() {
-        submodulesManager.addSubmodule(messagesManager);
-        submodulesManager.addSubmodule(loggersManager);	//Must be added after messages submodule!
+    	messagesManager = submodulesManager.addServicedSubmodule(ModuleMessagesManagerProvider.class, true);
+    	loggersManager = submodulesManager.addServicedSubmodule(ModuleLoggersManagerProvider.class, true);	//Must be added after messages submodule!
     }
 
     private void validateNotDisabled() {
@@ -56,6 +60,11 @@ public class VersatiaModuleImpl implements VersatiaModule {
 	@Override
 	public void addSubmodule(VersatiaSubmodule submodule) {
 		submodulesManager.addSubmodule(submodule);
+	}
+	
+	@Override
+	public <T extends VersatiaSubmodule> T addServicedSubmodule(Class<? extends VersatiaSubmoduleHandlerProvider> handler, boolean hardDepend) {
+		return submodulesManager.addServicedSubmodule(handler, hardDepend);
 	}
 
 	@Override
@@ -78,6 +87,11 @@ public class VersatiaModuleImpl implements VersatiaModule {
         Bukkit.getPluginManager().callEvent(new VersatiaModuleReloadedEvent(this, result));
         return result;
     }
+    
+	@Override
+	public Set<String> getReloadableNames() {
+		return submodulesManager.getReloadableNames();
+	}
 
     @Override
     public void registerGenericCommand(VersatiaGenericCommand command, CommandPriority priority) {
@@ -118,9 +132,13 @@ public class VersatiaModuleImpl implements VersatiaModule {
 
     @Override
     public VersatiaConfigurationFile getConfig(String path) {
-        path = plugin.getDataFolder() + "/" + path;
-        return VersatiaTools.searchForConfigurationFile(path);
+        return VersatiaTools.searchForConfigurationFile(new File(plugin.getDataFolder(), path));
     }
+    
+	@Override
+	public VersatiaConfigurationFile getConfig(String parentPath, String path) {
+        return VersatiaTools.searchForConfigurationFile(new File(new File(plugin.getDataFolder(), parentPath), path));
+	}
     
 	@Override
 	public VersatiaConfigurationProcessor getConfigProcessor(String path) {
@@ -164,5 +182,5 @@ public class VersatiaModuleImpl implements VersatiaModule {
 
 	public void validate() {
 		submodulesManager.validate();
-	}	
+	}
 }

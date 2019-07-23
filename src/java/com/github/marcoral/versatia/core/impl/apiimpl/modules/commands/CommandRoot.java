@@ -1,5 +1,8 @@
 package com.github.marcoral.versatia.core.impl.apiimpl.modules.commands;
 
+import java.util.List;
+
+import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.defaults.BukkitCommand;
 
@@ -21,6 +24,13 @@ public class CommandRoot extends BukkitCommand implements Comparable<CommandRoot
 	@Override
 	public boolean execute(CommandSender sender, String commandLabel, String[] args) {
 		return core.execute(sender, commandLabel.toLowerCase(), args);
+	}
+	
+	@Override
+	public List<String> tabComplete(CommandSender sender, String commandLabel, String[] args, Location location) throws IllegalArgumentException {
+		if(sender == null || commandLabel == null || args == null)
+			super.tabComplete(sender, commandLabel, args, location);
+		return core.tabComplete(sender, commandLabel.toLowerCase(), args, location);
 	}
 
 	public final CommandPriority getPriority() {

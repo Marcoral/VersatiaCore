@@ -14,6 +14,7 @@ import com.github.marcoral.versatia.core.api.modules.commands.VersatiaPlayerComm
 import com.github.marcoral.versatia.core.api.modules.loggers.LoggingPriority;
 import com.github.marcoral.versatia.core.api.modules.loggers.VersatiaLogger;
 import com.github.marcoral.versatia.core.api.modules.submodules.VersatiaSubmodule;
+import com.github.marcoral.versatia.core.api.tools.modules.VersatiaSubmoduleHandlerProvider;
 
 public class VersatiaModuleInitializerImpl implements VersatiaModuleInitializer {
     private VersatiaModule underlyingModule;
@@ -25,6 +26,11 @@ public class VersatiaModuleInitializerImpl implements VersatiaModuleInitializer 
     @Override
 	public void addSubmodule(VersatiaSubmodule submodule) {
 		underlyingModule.addSubmodule(submodule);
+	}
+
+	@Override
+	public <T extends VersatiaSubmodule> T addServicedSubmodule(Class<? extends VersatiaSubmoduleHandlerProvider> handler, boolean hardDepend) {
+		return underlyingModule.addServicedSubmodule(handler, hardDepend);	
 	}
 
     @Override

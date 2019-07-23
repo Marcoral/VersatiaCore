@@ -1,52 +1,48 @@
-#{0} stands for module name
-ErrorNoModuleFound: "^cse.No module found with name ^cseh.{0}^cse.!"
-
-
 ######################
 ### RELOAD COMMAND ###
 ######################
 
-ReloadDescription: "Submodules reloading command"
-ReloadUsageHint: "^csch.<command> <module name> [submodule names...]"
+CommandReloadDescription: "Submodules reloading command"
+CommandReloadUsageHint: "^csch.<command> <module name> [submodule names...]"
 
 #{0} stands for module name, {1} stand for reloaded submodules count
-ReloadSuccess: "^css.Reloaded module ^cssh.{0}^css. with total of ^cssh.{1}^css. submodule(s)."
+CommandReloadSuccess: "^css.Reloaded module ^cssh.{0}^css. with total of ^cssh.{1}^css. submodule(s)."
 
-ReloadErrorFoundUnknownSubmodules: "^cse.I couldn't handle below arguments:"
+CommandReloadErrorFoundUnknownSubmodules: "^cse.I couldn't handle below arguments:"
 
-ReloadError: "^cse.Anyway an error occurred when reloading modules from the list below:"
+CommandReloadError: "^cse.Anyway an error occurred when reloading modules from the list below:"
 
 #{0} stands for module name
-ReloadErrorSubmoduleName: "^cse.- ^cseh.{0}"
+CommandReloadErrorSubmoduleName: "^cse.- ^cseh.{0}"
 
 
 ###########################
 ### RELOAD CORE COMMAND ###
 ###########################
 
-ReloadCoreDescription: "VersatiaCore reloading command"
-ReloadCoreUsageHint: "^csch.<command> [submodule names...]"
+CommandReloadCoreDescription: "VersatiaCore reloading command"
+CommandReloadCoreUsageHint: "^csch.<command> [submodule names...]"
 
 
 ##########################
 ### REGENERATE COMMAND ###
 ##########################
 
-RegenerateDescription: Configuration regenerating command
-RegenerateUsageFlags: "^csch.[-f | -fr]: ^csc.overwrite existing | and reload"
-RegenerateUsageHint: "^csch.<command> <module name>"
+CommandRegenerateDescription: Configuration regenerating command
+CommandRegenerateUsageFlags: "^csch.[-f | -fr]: ^csc.overwrite existing | and reload"
+CommandRegenerateUsageHint: "^csch.<command> <module name>"
 
 #{0} stands for module name
-RegenerationSuccess: "^css.Configuration of module ^cssh.{0}^css. have been regenerated."
+CommandRegenerationSuccess: "^css.Configuration of module ^cssh.{0}^css. have been regenerated."
 
 #{0} stands for module name
-OverwrittingSuccess: "^css.Configuration of module ^cssh.{0}^css. have been overwritten."
+CommandOverwrittingSuccess: "^css.Configuration of module ^cssh.{0}^css. have been overwritten."
 
 
 ###############################
 ### REGENERATE CORE COMMAND ###
 ###############################
 
-RegenerateCoreDescription: VersatiaCore's configuration regenerating command
-RegenerateCoreUsageFlags: "^csch.[-f | -fr]: ^csc.overwrite existing | and reload"
-RegenerateCoreUsageHint: "^csch.<command>"
+CommandRegenerateCoreDescription: VersatiaCore's configuration regenerating command
+CommandRegenerateCoreUsageFlags: "^csch.[-f | -fr]: ^csc.overwrite existing | and reload"
+CommandRegenerateCoreUsageHint: "^csch.<command>"

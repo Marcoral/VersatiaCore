@@ -1,8 +1,13 @@
 package com.github.marcoral.versatia.core.impl.coreimpl.commands.versatia;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import com.github.marcoral.versatia.core.api.VersatiaConstants;
 import com.github.marcoral.versatia.core.api.modules.commands.VersatiaCommandContext;
 import com.github.marcoral.versatia.core.api.modules.commands.VersatiaGenericCommand;
+import com.github.marcoral.versatia.core.api.modules.commands.VersatiaTabCompletionContext;
 import com.github.marcoral.versatia.core.impl.VersatiaCoreConstants;
 
 public class CoreCommandCoreConfigurationRegenerate implements VersatiaGenericCommand {
@@ -18,7 +23,7 @@ public class CoreCommandCoreConfigurationRegenerate implements VersatiaGenericCo
 	
 	@Override
 	public String getDescription() {
-		return "RegenerateCoreDescription";
+		return "CommandRegenerateCoreDescription";
 	}
 	
 	@Override
@@ -28,12 +33,12 @@ public class CoreCommandCoreConfigurationRegenerate implements VersatiaGenericCo
 	
 	@Override
 	public String[] getUsageHints() {
-		return new String[] {"RegenerateCoreUsageHint"};
+		return new String[] {"CommandRegenerateCoreUsageHint"};
 	}
 	
 	@Override
 	public String[] getUsageFlags() {
-		return new String[] {"RegenerateCoreUsageFlags"};
+		return new String[] {"CommandRegenerateCoreUsageFlags"};
 	}
 	
 	
@@ -48,5 +53,15 @@ public class CoreCommandCoreConfigurationRegenerate implements VersatiaGenericCo
 		final String versatiaPluginName = VersatiaConstants.VERSATIA_CORE_NAME;
 		String passedParameter = argsCount == 1? context.getArgument(0) : null;
 		return CoreCommandConfigurationRegenerate.regenerate(VersatiaConstants.VERSATIA, versatiaPluginName, passedParameter, context);
+	}
+	
+	@Override
+	public List<String> tabComplete(VersatiaTabCompletionContext context) {
+		switch (context.getArgsCount()) {
+			case 1:
+				return Arrays.asList(new String[] {"-f", "-fr"});
+			default:
+				return new ArrayList<>();
+		}
 	}
 }

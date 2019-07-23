@@ -30,6 +30,13 @@ public class VersatiaConfigurationFileImpl implements VersatiaConfigurationFile 
         }
         return new VersatiaConfigurationProcessorImpl(config);
     }
+    
+    @Override
+    public VersatiaConfigurationProcessor getProcessorIgnoreContent() {
+        if(config == null)
+        	config = new YamlConfiguration();
+        return new VersatiaConfigurationProcessorImpl(config);
+    }
 
     @Override
     public void saveData() {
@@ -45,5 +52,9 @@ public class VersatiaConfigurationFileImpl implements VersatiaConfigurationFile 
             e.printStackTrace();
         }
     }
-}
 
+	@Override
+	public File getUnderlyingFile() {
+		return destination;
+	}
+}
